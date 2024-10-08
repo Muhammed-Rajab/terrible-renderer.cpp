@@ -92,7 +92,7 @@ int main()
 
     while (true)
     {
-        resetBuffer(buffer, screenWidth, screenHeight, Pixel{0, 50, 0});
+        resetBuffer(buffer, screenWidth, screenHeight, Pixel{(unsigned char)(frameCount % 255), 0, 0});
 
         // * DRAWING CODE GOES HERE
 
