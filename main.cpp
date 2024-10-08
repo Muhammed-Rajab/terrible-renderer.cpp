@@ -268,7 +268,25 @@ int main()
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
     Renderer r{64, 64};
-    r.loop();
+
+    r.clearScreen();
+    r.resetCursor();
+    float DELAY_uS = (1 / 60.0f) * 1000000;
+
+    while (true)
+    {
+        r.resetBuffer(Pixel{255, 255, 255});
+
+        // * DRAWING CODE GOES HERE --------------------------------------->
+        r.rectangle(0, 0, 10, 10, {0, 0, 255});
+
+        //*---------------------------------------------------------------->
+        r.swapBuffers();
+        r.resetCursor();
+        r.render();
+
+        usleep(DELAY_uS);
+    }
 
     return EXIT_SUCCESS;
 }
