@@ -282,7 +282,7 @@ int main()
     int tilesetWidth = 0;
     int tilesetHeight = 0;
     int tilesetChannels = 0;
-    unsigned char *tileset = stbi_load("./assets/test/tileset.png", &tilesetWidth, &tilesetHeight, &tilesetChannels, 3);
+    unsigned char *tileset = stbi_load("./assets/test/tileset.png", &tilesetWidth, &tilesetHeight, &tilesetChannels, 4);
 
     if (tileset == nullptr)
     {
@@ -296,12 +296,26 @@ int main()
         r.resetBuffer(Pixel{255, 255, 255});
 
         // * DRAWING CODE GOES HERE --------------------------------------->
-        r.rectangle(0, 0, 10, 10, {0, 0, 255});
+        for (int j = 0; j < 16; ++j)
+        {
+            for (int i = 0; i < 4 * 16; i += 4)
+            {
+                int index = j * tilesetWidth * 4 + i;
+
+                uint8_t red = tileset[index];
+                uint8_t green = tileset[index + 1];
+                uint8_t blue = tileset[index + 2];
+
+                r.putPixel(i / 4, j, {red, green, blue});
+            }
+        }
 
         //*---------------------------------------------------------------->
         r.swapBuffers();
         r.resetCursor();
         r.render();
+
+        break;
 
         usleep(DELAY_uS);
     }
