@@ -265,6 +265,39 @@ Pixel HSLtoPixel(int hue, float s, float l)
     return {(std::uint8_t)col.r, (std::uint8_t)col.g, (std::uint8_t)col.b};
 }
 
+void drawTile(int n, int x, int y, unsigned char *tileset, int tilesetWidth, int tilesetHeight, int tilesetChannels, int tileWidth, int tileHeight, Renderer &r)
+{
+
+    int linearWidth = tileWidth * n;
+
+    // ((Tw * n) // w) * h
+    int j0 = (linearWidth / tilesetWidth) * tileHeight;
+
+    // ( Tw * n ) % w
+    int i0 = (linearWidth % tilesetWidth) * tilesetChannels;
+
+    std::cout << "X: " << i0 << " Y: " << j0 << "\n";
+
+    int xTemp = x;
+    int yTemp = y;
+    for (int j = j0; j < j0 + 16; ++j)
+    {
+        int x0 = xTemp;
+        for (int i = i0; i < i0 + tilesetChannels * 16; i += tilesetChannels)
+        {
+            int index = j * tilesetWidth * tilesetChannels + i;
+
+            uint8_t red = tileset[index];
+            uint8_t green = tileset[index + 1];
+            uint8_t blue = tileset[index + 2];
+
+            r.putPixel(x0, yTemp, {red, green, blue});
+            ++x0;
+        }
+        ++yTemp;
+    }
+}
+
 int main()
 {
     // ! SEEDING
@@ -284,6 +317,9 @@ int main()
     int tilesetChannels = 0;
     unsigned char *tileset = stbi_load("./assets/test/tileset.png", &tilesetWidth, &tilesetHeight, &tilesetChannels, 4);
 
+    int tileWidth = 16;
+    int tileHeight = 16;
+
     if (tileset == nullptr)
     {
         throw(std::string("Failed to load tileset"));
@@ -296,19 +332,7 @@ int main()
         r.resetBuffer(Pixel{255, 255, 255});
 
         // * DRAWING CODE GOES HERE --------------------------------------->
-        for (int j = 0; j < 16; ++j)
-        {
-            for (int i = 0; i < 4 * 16; i += 4)
-            {
-                int index = j * tilesetWidth * 4 + i;
-
-                uint8_t red = tileset[index];
-                uint8_t green = tileset[index + 1];
-                uint8_t blue = tileset[index + 2];
-
-                r.putPixel(i / 4, j, {red, green, blue});
-            }
-        }
+        drawTile(241, 0, 0, tileset, tilesetWidth, tilesetHeight, tilesetChannels, tileWidth, tileHeight, r);
 
         //*---------------------------------------------------------------->
         r.swapBuffers();
