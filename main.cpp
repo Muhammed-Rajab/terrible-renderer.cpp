@@ -17,6 +17,7 @@ GOALS:
 #include <ctime>
 #include <unistd.h>
 #include "include/hsl.h"
+#include "include/map.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "include/stb_image.h"
@@ -92,9 +93,10 @@ public:
         }
     }
 
-    void putPixel(int x, int y, Pixel color)
+    inline void putPixel(int x, int y, Pixel color)
     {
-        this->buffer[y * this->width + x] = color;
+        if (x >= 0 && x < this->width && y >= 0 && y < this->height)
+            this->buffer[y * this->width + x] = color;
     }
 
     void swapBuffers()
@@ -276,7 +278,7 @@ void drawTile(int n, int x, int y, unsigned char *tileset, int tilesetWidth, int
     // ( Tw * n ) % w
     int i0 = (linearWidth % tilesetWidth) * tilesetChannels;
 
-    std::cout << "X: " << i0 << " Y: " << j0 << "\n";
+    // std::cout << "X: " << i0 << " Y: " << j0 << "\n";
 
     int xTemp = x;
     int yTemp = y;
@@ -310,8 +312,6 @@ int main()
     float DELAY_uS = (1 / 60.0f) * 1000000;
 
     // ! READY THE SPRITES
-
-    // * LOAD IMAGE
     int tilesetWidth = 0;
     int tilesetHeight = 0;
     int tilesetChannels = 0;
@@ -321,95 +321,17 @@ int main()
     int tileWidth = 16;
     int tileHeight = 16;
 
-    // * LOAD MAP
-    const int MAP_X = 8;
-    const int MAP_Y = 8;
-    int map[] = {
-        //
-        121,
-        122,
-        122,
-        122,
-        122,
-        122,
-        122,
-        123,
-        //
-        161,
-        162,
-        162,
-        162,
-        162,
-        162,
-        162,
-        163,
-        //
-        161,
-        162,
-        256,
-        257,
-        257,
-        258,
-        162,
-        497,
-        //
-        161,
-        162,
-        296,
-        17,
-        18,
-        298,
-        162,
-        497,
-        //
-        161,
-        162,
-        296,
-        57,
-        58,
-        298,
-        162,
-        497,
-        //
-        161,
-        162,
-        336,
-        337,
-        337,
-        338,
-        162,
-        497,
-        //
-        161,
-        162,
-        162,
-        162,
-        162,
-        162,
-        162,
-        163,
-        //
-        201,
-        202,
-        202,
-        202,
-        202,
-        202,
-        202,
-        203,
-    };
-
     while (true)
     {
-        r.resetBuffer(Pixel{255, 255, 255});
+        r.resetBuffer(Pixel{0, 0, 0});
 
         // * DRAWING CODE GOES HERE --------------------------------------->
         int index = 0;
-        for (int y = 0; y < tileHeight * MAP_Y; y += tileHeight)
+        for (int y = 0; y < tileHeight * Tilemap::height; y += tileHeight)
         {
-            for (int x = 0; x < tileWidth * MAP_X; x += tileWidth)
+            for (int x = 0; x < tileWidth * Tilemap::width; x += tileWidth)
             {
-                drawTile(map[index] - 1, x, y, tileset, tilesetWidth, tilesetHeight, tilesetChannels, tileWidth, tileHeight, r);
+                drawTile(Tilemap::map[index] - 1, x, y, tileset, tilesetWidth, tilesetHeight, tilesetChannels, tileWidth, tileHeight, r);
                 ++index;
             }
         }
