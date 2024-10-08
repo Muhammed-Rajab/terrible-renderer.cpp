@@ -321,18 +321,26 @@ int main()
     int tileWidth = 16;
     int tileHeight = 16;
 
+    int cameraX = 0;
+    int cameraY = 0;
+
     while (true)
     {
         r.resetBuffer(Pixel{0, 0, 0});
 
         // * DRAWING CODE GOES HERE --------------------------------------->
-        int index = 0;
-        for (int y = 0; y < tileHeight * Tilemap::height; y += tileHeight)
+        for (int y = 0; y < 8; ++y)
         {
-            for (int x = 0; x < tileWidth * Tilemap::width; x += tileWidth)
+            for (int x = 0; x < 8; ++x)
             {
-                drawTile(Tilemap::map[index] - 1, x, y, tileset, tilesetWidth, tilesetHeight, tilesetChannels, tileWidth, tileHeight, r);
-                ++index;
+                int mapX = cameraX + x;
+                int mapY = cameraY + y;
+
+                if (mapX >= 0 && mapX < Tilemap::WIDTH && mapY >= 0 && mapY < Tilemap::HEIGHT)
+                {
+                    int tile = Tilemap::map[mapY][mapX];
+                    drawTile(tile - 1, x * 16, y * 16, tileset, tilesetWidth, tilesetHeight, tilesetChannels, Tilemap::TILE_SIZE, Tilemap::TILE_SIZE, r);
+                }
             }
         }
 
@@ -340,8 +348,6 @@ int main()
         r.swapBuffers();
         r.resetCursor();
         r.render();
-
-        break;
 
         usleep(DELAY_uS);
     }
