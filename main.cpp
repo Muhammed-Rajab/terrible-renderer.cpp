@@ -16,6 +16,9 @@ GOALS:
 #include <cstdlib>
 #include <ctime>
 #include <termios.h>
+#include <thread>
+#include <atomic>
+#include <chrono>
 #include <fcntl.h>
 #include <unistd.h>
 #include "include/hsl.h"
@@ -334,6 +337,36 @@ char getch()
     return c;
 }
 
+struct Camera
+{
+    int x;
+    int y;
+};
+
+void keyListener(Camera &cam)
+{
+    while (true)
+    {
+        if (kbhit())
+        {
+            char currentKey = getch(); // Get the currently pressed key
+
+            // Check for key release logic here if necessary
+            if (currentKey == 'w')
+            {
+                cam.x++;
+            }
+
+            if (currentKey == 's')
+            {
+                cam.y++;
+            }
+        }
+        // std::this_thread::sleep_for(std::chrono::milliseconds(50)); // Reduce CPU usage
+        std::this_thread::yield();
+    }
+}
+
 int main()
 {
     // ! SEEDING
@@ -343,7 +376,8 @@ int main()
 
     r.clearScreen();
     r.resetCursor();
-    float DELAY_uS = (1 / 60.0f) * 1000000;
+    // float DELAY_uS = (1 / 60.0f) * 1000000;
+    int DELAY = 16;
 
     // ! READY THE SPRITES
     int tilesetWidth = 0;
@@ -355,8 +389,9 @@ int main()
     int tileWidth = 16;
     int tileHeight = 16;
 
-    int cameraX = 0;
-    int cameraY = 0;
+    Camera cam{0, 0};
+
+    std::thread listener(keyListener, std::ref(cam));
 
     while (true)
     {
@@ -367,8 +402,8 @@ int main()
         {
             for (int x = 0; x < 8; ++x)
             {
-                int mapX = cameraX + x;
-                int mapY = cameraY + y;
+                int mapX = cam.x + x;
+                int mapY = cam.y + y;
 
                 if (mapX >= 0 && mapX < Tilemap::WIDTH && mapY >= 0 && mapY < Tilemap::HEIGHT)
                 {
@@ -383,8 +418,10 @@ int main()
         r.resetCursor();
         r.render();
 
-        usleep(DELAY_uS);
+        std::this_thread::sleep_for(std::chrono::milliseconds(DELAY)); // Control main loop delay
     }
+
+    listener.join();
 
     return EXIT_SUCCESS;
 }
