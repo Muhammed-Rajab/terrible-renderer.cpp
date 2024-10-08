@@ -231,28 +231,11 @@ public:
 
         float DELAY_uS = (1 / 60.0f) * 1000000;
 
-        float angle = 0;
-        float radius = 25;
-        int Ox = this->width / 2;
-        int Oy = this->height / 2;
-
         while (true)
         {
             this->resetBuffer(Pixel{255, 255, 255});
 
             // * DRAWING CODE GOES HERE --------------------------------------->
-
-            this->circleFill(Ox, Oy, 30, {0, 255, 0});
-            this->circleBorder(Ox, Oy, 30, {0, 0, 0});
-            this->line(Ox, Oy, Ox + radius * std::cos(angle), Oy + radius * std::sin(angle), {255, 0, 0});
-            this->rectangle(Ox, Oy, 1, 1, {0, 0, 255});
-
-            angle += 0.1;
-
-            if (angle >= 360)
-            {
-                angle = 0;
-            }
 
             //*---------------------------------------------------------------->
             this->swapBuffers();
@@ -276,13 +259,14 @@ int randomInteger(int min, int max)
 Pixel HSLtoPixel(int hue, float s, float l)
 {
     RGBColor col = HSLToRGB(hue, s, l);
-    return {col.r, col.g, col.b};
+    return {(std::uint8_t)col.r, (std::uint8_t)col.g, (std::uint8_t)col.b};
 }
 
 int main()
 {
     // ! SEEDING
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
     Renderer r{64, 64};
     r.loop();
 
