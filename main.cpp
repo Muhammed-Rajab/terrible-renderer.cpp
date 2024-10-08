@@ -303,7 +303,7 @@ int main()
     // ! SEEDING
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
-    Renderer r{64, 64};
+    Renderer r{128, 128};
 
     r.clearScreen();
     r.resetCursor();
@@ -316,23 +316,103 @@ int main()
     int tilesetHeight = 0;
     int tilesetChannels = 0;
     unsigned char *tileset = stbi_load("./assets/test/tileset.png", &tilesetWidth, &tilesetHeight, &tilesetChannels, 4);
-
+    if (tileset == nullptr)
+        throw(std::string("Failed to load tileset"));
     int tileWidth = 16;
     int tileHeight = 16;
 
-    if (tileset == nullptr)
-    {
-        throw(std::string("Failed to load tileset"));
-    }
-
     // * LOAD MAP
+    const int MAP_X = 8;
+    const int MAP_Y = 8;
+    int map[] = {
+        //
+        121,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        123,
+        //
+        161,
+        162,
+        162,
+        162,
+        162,
+        162,
+        162,
+        163,
+        //
+        161,
+        162,
+        256,
+        257,
+        257,
+        258,
+        162,
+        497,
+        //
+        161,
+        162,
+        296,
+        17,
+        18,
+        298,
+        162,
+        497,
+        //
+        161,
+        162,
+        296,
+        57,
+        58,
+        298,
+        162,
+        497,
+        //
+        161,
+        162,
+        336,
+        337,
+        337,
+        338,
+        162,
+        497,
+        //
+        161,
+        162,
+        162,
+        162,
+        162,
+        162,
+        162,
+        163,
+        //
+        201,
+        202,
+        202,
+        202,
+        202,
+        202,
+        202,
+        203,
+    };
 
     while (true)
     {
         r.resetBuffer(Pixel{255, 255, 255});
 
         // * DRAWING CODE GOES HERE --------------------------------------->
-        drawTile(241, 0, 0, tileset, tilesetWidth, tilesetHeight, tilesetChannels, tileWidth, tileHeight, r);
+        int index = 0;
+        for (int y = 0; y < tileHeight * MAP_Y; y += tileHeight)
+        {
+            for (int x = 0; x < tileWidth * MAP_X; x += tileWidth)
+            {
+                drawTile(map[index] - 1, x, y, tileset, tilesetWidth, tilesetHeight, tilesetChannels, tileWidth, tileHeight, r);
+                ++index;
+            }
+        }
 
         //*---------------------------------------------------------------->
         r.swapBuffers();
