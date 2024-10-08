@@ -15,6 +15,8 @@ GOALS:
 #include <cstring>
 #include <cstdlib>
 #include <ctime>
+#include <termios.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include "include/hsl.h"
 #include "include/map.h"
@@ -298,6 +300,38 @@ void drawTile(int n, int x, int y, unsigned char *tileset, int tilesetWidth, int
         }
         ++yTemp;
     }
+}
+
+bool kbhit()
+{
+    struct termios oldt, newt;
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
+    int bytesWaiting = 0;
+    // Check for bytes waiting in the stdin stream
+    if (read(STDIN_FILENO, &bytesWaiting, sizeof(bytesWaiting)) == -1)
+    {
+        bytesWaiting = 0; // If there's an error, set to 0
+    }
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    return bytesWaiting > 0;
+}
+
+char getch()
+{
+    char c;
+    struct termios oldt, newt;
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    read(STDIN_FILENO, &c, 1);
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    return c;
 }
 
 int main()
