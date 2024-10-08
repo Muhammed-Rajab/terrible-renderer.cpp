@@ -18,6 +18,9 @@ GOALS:
 #include <unistd.h>
 #include "include/hsl.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "include/stb_image.h"
+
 struct Pixel
 {
     uint8_t r;
@@ -272,6 +275,21 @@ int main()
     r.clearScreen();
     r.resetCursor();
     float DELAY_uS = (1 / 60.0f) * 1000000;
+
+    // ! READY THE SPRITES
+
+    // * LOAD IMAGE
+    int tilesetWidth = 0;
+    int tilesetHeight = 0;
+    int tilesetChannels = 0;
+    unsigned char *tileset = stbi_load("./assets/test/tileset.png", &tilesetWidth, &tilesetHeight, &tilesetChannels, 3);
+
+    if (tileset == nullptr)
+    {
+        throw(std::string("Failed to load tileset"));
+    }
+
+    // * LOAD MAP
 
     while (true)
     {
