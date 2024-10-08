@@ -10,26 +10,36 @@ GOALS:
         - Load an image to memory, and draw it to the buffer
 */
 #include <iostream>
+#include <sstream>
 #include <cstdint>
+#include <unistd.h>
+#include "include/hsl.h"
 
 struct Pixel
 {
     uint8_t r;
     uint8_t g;
     uint8_t b;
+
+    void display()
+    {
+        std::cout << "R: " << (int)this->r << " G: " << (int)this->g << " B: " << (int)this->b << "\n";
+    }
 };
 
 void renderBuffer(Pixel *buffer, int width, int height)
 {
+    std::ostringstream oss;
     for (int y = 0; y < height; ++y)
     {
         for (int x = 0; x < width; ++x)
         {
             Pixel p = buffer[y * width + x];
-            std::cout << "\033[38;2;" << (unsigned int)p.r << ";" << (unsigned int)p.g << ";" << (unsigned int)p.b << "m" << "██";
+            oss << "\033[38;2;" << (unsigned int)p.r << ";" << (unsigned int)p.g << ";" << (unsigned int)p.b << "m" << "██";
         }
-        std::cout << "\n";
+        oss << "\n";
     }
+    std::cout << oss.str();
 }
 
 void fillBuffer(Pixel *buffer, int width, int x, int y, Pixel p)
@@ -54,21 +64,45 @@ void resetBuffer(Pixel *buffer, int width, int height, Pixel p)
     }
 }
 
+void putPixel(Pixel *buffer, int width, int x, int y, Pixel color)
+{
+    buffer[y * width + x] = color;
+}
+
+void clearScreen()
+{
+    std::cout << "\033[2J";
+}
+
+void resetCursor()
+{
+    std::cout << "\033[H";
+}
+
 int main()
 {
-    int screenWidth = 30;
-    int screenHeight = 30;
+    int screenWidth = 64;
+    int screenHeight = 64;
+    std::size_t frameCount = 0;
 
     Pixel *buffer = new Pixel[screenWidth * screenHeight];
 
-    resetBuffer(buffer, screenWidth, screenHeight, Pixel{0, 50, 0});
+    clearScreen();
+    resetCursor();
 
-    for (int i = 30; i >= 0; i -= 1)
+    while (true)
     {
-        fillBuffer(buffer, screenWidth, i, i, Pixel{0, (uint8_t)((i / 30.f) * 255), 0});
-    }
+        resetBuffer(buffer, screenWidth, screenHeight, Pixel{0, 50, 0});
 
-    renderBuffer(buffer, screenWidth, screenHeight);
+        // * DRAWING CODE GOES HERE
+
+        resetCursor();
+        renderBuffer(buffer, screenWidth, screenHeight);
+
+        usleep((1 / 60.0f) * 1000);
+
+        ++frameCount;
+    }
 
     delete[] buffer;
 
