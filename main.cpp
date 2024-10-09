@@ -302,6 +302,14 @@ public:
     }
 };
 
+struct Camera
+{
+    float x;
+    float y;
+    float dx;
+    float dy;
+};
+
 //*-----------------------
 //* UTILS
 //*-----------------------
@@ -314,6 +322,89 @@ Pixel HSLtoPixel(int hue, float s, float l)
 {
     RGBColor col = HSLToRGB(hue, s, l);
     return {(std::uint8_t)col.r, (std::uint8_t)col.g, (std::uint8_t)col.b};
+}
+
+bool kbhit()
+{
+    struct termios oldt, newt;
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
+    int bytesWaiting = 0;
+    // Check for bytes waiting in the stdin stream
+    if (read(STDIN_FILENO, &bytesWaiting, sizeof(bytesWaiting)) == -1)
+    {
+        bytesWaiting = 0; // If there's an error, set to 0
+    }
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    return bytesWaiting > 0;
+}
+
+char getch()
+{
+    char c;
+    struct termios oldt, newt;
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    read(STDIN_FILENO, &c, 1);
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    return c;
+}
+
+void keyListener(Camera &cam)
+{
+    while (true)
+    {
+        if (kbhit())
+        {
+            char currentKey = getch(); // Get the currently pressed key
+
+            // Check for key release logic here if necessary
+            switch (currentKey)
+            {
+            case 'D':
+            case 'd':
+                cam.x += cam.dx;
+                break;
+            case 'A':
+            case 'a':
+                cam.x -= cam.dx;
+                break;
+            case 'W':
+            case 'w':
+                cam.y -= cam.dy;
+                break;
+            case 'S':
+            case 's':
+                cam.y += cam.dy;
+                break;
+
+            case 'J':
+            case 'j':
+                cam.dx -= 0.1;
+                break;
+            case 'L':
+            case 'l':
+                cam.dx += 0.1;
+                break;
+            case 'I':
+            case 'i':
+                cam.dy -= 0.1;
+                break;
+            case 'K':
+            case 'k':
+                cam.dy += 0.1;
+                break;
+            }
+        }
+        // std::this_thread::sleep_for(std::chrono::milliseconds(50)); // Reduce CPU usage
+        std::this_thread::yield();
+    }
 }
 
 //*-----------------------------------------
@@ -376,96 +467,11 @@ public:
     }
 };
 
-bool kbhit()
+class Tilemap
 {
-    struct termios oldt, newt;
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-
-    int bytesWaiting = 0;
-    // Check for bytes waiting in the stdin stream
-    if (read(STDIN_FILENO, &bytesWaiting, sizeof(bytesWaiting)) == -1)
-    {
-        bytesWaiting = 0; // If there's an error, set to 0
-    }
-
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-    return bytesWaiting > 0;
-}
-
-char getch()
-{
-    char c;
-    struct termios oldt, newt;
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-    read(STDIN_FILENO, &c, 1);
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-    return c;
-}
-
-struct Camera
-{
-    float x;
-    float y;
-    float dx;
-    float dy;
+public:
+    Tilemap(int tilesAcross, int tilesDown, int) {}
 };
-
-void keyListener(Camera &cam)
-{
-    while (true)
-    {
-        if (kbhit())
-        {
-            char currentKey = getch(); // Get the currently pressed key
-
-            // Check for key release logic here if necessary
-            switch (currentKey)
-            {
-            case 'D':
-            case 'd':
-                cam.x += cam.dx;
-                break;
-            case 'A':
-            case 'a':
-                cam.x -= cam.dx;
-                break;
-            case 'W':
-            case 'w':
-                cam.y -= cam.dy;
-                break;
-            case 'S':
-            case 's':
-                cam.y += cam.dy;
-                break;
-
-            case 'J':
-            case 'j':
-                cam.dx -= 0.1;
-                break;
-            case 'L':
-            case 'l':
-                cam.dx += 0.1;
-                break;
-            case 'I':
-            case 'i':
-                cam.dy -= 0.1;
-                break;
-            case 'K':
-            case 'k':
-                cam.dy += 0.1;
-                break;
-            }
-        }
-        // std::this_thread::sleep_for(std::chrono::milliseconds(50)); // Reduce CPU usage
-        std::this_thread::yield();
-    }
-}
 
 int main()
 {
@@ -498,6 +504,8 @@ int main()
     int **objLayer = Tilemaps::OneD2TwoD(Tilemaps::objectLayer, Tilemaps::WIDTH, Tilemaps::HEIGHT, sizeof(Tilemaps::objectLayer) / sizeof(int));
 
     Tileset ts{"./assets/test/tileset.png", 16};
+
+    float prevCamX = cam.x;
 
     while (true)
     {
