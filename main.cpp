@@ -334,10 +334,14 @@ public:
     Tileset(char *filename, int tile_size)
     {
         this->filename = filename;
-        this->TILE_SIZE = TILE_SIZE;
+        this->TILE_SIZE = tile_size;
         this->data = stbi_load(filename, &this->tilesetWidth, &this->tilesetHeight, &this->tilesetChannels, 4);
         if (this->data == nullptr)
             throw std::string("can't load image");
+
+        std::cout << "Tileset Width: " << this->tilesetWidth << "\n";
+        std::cout << "Tileset Height: " << this->tilesetHeight << "\n";
+        std::cout << "Tileset Channels: " << this->tilesetChannels << "\n";
     }
 
     void renderTile(int n, int x, int y, Renderer &r)
@@ -353,10 +357,10 @@ public:
 
         int xTemp = x;
         int yTemp = y;
-        for (int j = j0; j < j0 + 16; ++j)
+        for (int j = j0; j < j0 + this->TILE_SIZE; ++j)
         {
             int x0 = xTemp;
-            for (int i = i0; i < i0 + this->tilesetChannels * 16; i += this->tilesetChannels)
+            for (int i = i0; i < i0 + this->tilesetChannels * this->TILE_SIZE; i += this->tilesetChannels)
             {
                 int index = j * this->tilesetWidth * this->tilesetChannels + i;
 
@@ -509,7 +513,7 @@ int main()
     r.resetCursor();
     // float DELAY_uS = (1 / 60.0f) * 1000000;
     // int DELAY = 16;
-    int DELAY = 1;
+    int DELAY = 16;
 
     // ! READY THE SPRITES
     int tilesetWidth = 0;
@@ -527,6 +531,8 @@ int main()
 
     int **bgLayer = Tilemaps::OneD2TwoD(Tilemaps::backgroundLayer, Tilemaps::WIDTH, Tilemaps::HEIGHT, sizeof(Tilemaps::backgroundLayer) / sizeof(int));
     int **objLayer = Tilemaps::OneD2TwoD(Tilemaps::objectLayer, Tilemaps::WIDTH, Tilemaps::HEIGHT, sizeof(Tilemaps::objectLayer) / sizeof(int));
+
+    Tileset ts{"./assets/test/tileset.png", 16};
 
     while (true)
     {
@@ -557,9 +563,8 @@ int main()
                     int backgroundTile = bgLayer[mapY][mapX];
                     int objectTile = objLayer[mapY][mapX];
 
-                    drawTile(backgroundTile - 1, tileX, tileY, tileset, tilesetWidth, tilesetHeight, tilesetChannels, Tilemaps::TILE_SIZE, Tilemaps::TILE_SIZE, r);
-
-                    drawTile(objectTile - 1, tileX, tileY, tileset, tilesetWidth, tilesetHeight, tilesetChannels, Tilemaps::TILE_SIZE, Tilemaps::TILE_SIZE, r);
+                    ts.renderTile(backgroundTile - 1, tileX, tileY, r);
+                    ts.renderTile(objectTile - 1, tileX, tileY, r);
                 }
             }
         }
