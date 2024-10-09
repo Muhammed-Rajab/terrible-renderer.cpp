@@ -32,6 +32,7 @@ struct Pixel
     uint8_t r;
     uint8_t g;
     uint8_t b;
+    uint8_t a = 255;
 
     void display()
     {
@@ -105,8 +106,38 @@ public:
             // * GET PREV VALUE
             // * CHECK ALPHA
             // FIXME: ADD SUPPORT FOR SEMI TRANSPARENT BACKGROUND
-            // Pixel &temp = this->buffer[y * this->width + x];
-            this->buffer[y * this->width + x] = color;
+            // this->buffer[y * this->width + x] = color;
+
+            Pixel temp = this->buffer[y * this->width + x];
+            if (color.a == 0)
+            {
+                return;
+            }
+
+            if (color.a == 255)
+            {
+                this->buffer[y * this->width + x] = color;
+                return;
+            }
+
+            // FIXME: SHUTTING ALPHA BLENDING FOR NOW, DUE TO EXCESS FLOATING POINT ARITHEMETIC
+            return;
+            if (color.a > 0 && color.a < 255)
+            {
+                // TODO: ! BLEND THIS BITCH
+                Pixel &dst = this->buffer[y * this->width + x];
+
+                float sA = color.a / 255.0f;
+                float dA = dst.a / 255.0f;
+
+                uint8_t dr = color.r * sA + (dst.r * (1 - sA));
+                uint8_t dg = color.g * sA + (dst.g * (1 - sA));
+                uint8_t db = color.b * sA + (dst.b * (1 - sA));
+
+                uint8_t outAlpha = (sA + dA * (1 - sA)) * 255;
+
+                this->buffer[y * this->width + x] = {dr, dg, db, outAlpha};
+            }
         }
     }
 
@@ -303,8 +334,9 @@ void drawTile(int n, int x, int y, unsigned char *tileset, int tilesetWidth, int
             uint8_t red = tileset[index];
             uint8_t green = tileset[index + 1];
             uint8_t blue = tileset[index + 2];
+            uint8_t alpha = tileset[index + 3];
 
-            r.putPixel(x0, yTemp, {red, green, blue});
+            r.putPixel(x0, yTemp, {red, green, blue, alpha});
             ++x0;
         }
         ++yTemp;
@@ -407,7 +439,7 @@ int main()
     // ! SEEDING
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
-    Renderer r{128, 128};
+    Renderer r{256, 256};
 
     r.clearScreen();
     r.resetCursor();
@@ -425,9 +457,12 @@ int main()
     int tileWidth = 16;
     int tileHeight = 16;
 
-    Camera cam{0, 0, 0.2, 0.2};
+    Camera cam{0, 0, 0.4, 0.4};
 
     std::thread listener(keyListener, std::ref(cam));
+
+    int **bgLayer = Tilemap::OneD2TwoD(Tilemap::backgroundLayer, Tilemap::WIDTH, Tilemap::HEIGHT, sizeof(Tilemap::backgroundLayer) / sizeof(int));
+    int **objLayer = Tilemap::OneD2TwoD(Tilemap::objectLayer, Tilemap::WIDTH, Tilemap::HEIGHT, sizeof(Tilemap::objectLayer) / sizeof(int));
 
     while (true)
     {
@@ -455,21 +490,29 @@ int main()
 
                 if (mapX >= 0 && mapX < Tilemap::WIDTH && mapY >= 0 && mapY < Tilemap::HEIGHT)
                 {
-                    int tile = Tilemap::map[mapY][mapX];
-                    drawTile(tile - 1, tileX, tileY, tileset, tilesetWidth, tilesetHeight, tilesetChannels, Tilemap::TILE_SIZE, Tilemap::TILE_SIZE, r);
+                    int backgroundTile = bgLayer[mapY][mapX];
+                    int objectTile = objLayer[mapY][mapX];
+
+                    drawTile(backgroundTile - 1, tileX, tileY, tileset, tilesetWidth, tilesetHeight, tilesetChannels, Tilemap::TILE_SIZE, Tilemap::TILE_SIZE, r);
+
+                    drawTile(objectTile - 1, tileX, tileY, tileset, tilesetWidth, tilesetHeight, tilesetChannels, Tilemap::TILE_SIZE, Tilemap::TILE_SIZE, r);
                 }
             }
         }
-
-        drawTile(1, 0, 0, tileset, tilesetWidth, tilesetHeight, tilesetChannels, tileWidth, tileHeight, r);
 
         //*---------------------------------------------------------------->
         r.swapBuffers();
         r.resetCursor();
         r.render();
 
+        cam.x += 0.1;
+
         std::this_thread::sleep_for(std::chrono::milliseconds(DELAY)); // Control main loop delay
     }
+
+    // ! FREE TILES
+    Tilemap::deleteTwoDArray(bgLayer, Tilemap::HEIGHT);
+    Tilemap::deleteTwoDArray(objLayer, Tilemap::HEIGHT);
 
     listener.join();
 
