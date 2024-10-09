@@ -352,14 +352,24 @@ void keyListener(Camera &cam)
             char currentKey = getch(); // Get the currently pressed key
 
             // Check for key release logic here if necessary
-            if (currentKey == 'w')
+            switch (currentKey)
             {
+            case 'D':
+            case 'd':
                 cam.x++;
-            }
-
-            if (currentKey == 's')
-            {
+                break;
+            case 'A':
+            case 'a':
+                cam.x--;
+                break;
+            case 'W':
+            case 'w':
+                cam.y--;
+                break;
+            case 'S':
+            case 's':
                 cam.y++;
+                break;
             }
         }
         // std::this_thread::sleep_for(std::chrono::milliseconds(50)); // Reduce CPU usage
