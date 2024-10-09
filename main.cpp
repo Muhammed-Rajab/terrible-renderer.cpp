@@ -502,69 +502,122 @@ void keyListener(Camera &cam)
     }
 }
 
+// int main()
+// {
+//     // ! SEEDING
+//     std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
+//     Renderer r{170, 128};
+
+//     r.clearScreen();
+//     r.resetCursor();
+//     // float DELAY_uS = (1 / 60.0f) * 1000000;
+//     // int DELAY = 16;
+//     int DELAY = 16;
+
+//     // ! READY THE SPRITES
+//     int tilesetWidth = 0;
+//     int tilesetHeight = 0;
+//     int tilesetChannels = 0;
+//     unsigned char *tileset = stbi_load("./assets/test/tileset.png", &tilesetWidth, &tilesetHeight, &tilesetChannels, 4);
+//     if (tileset == nullptr)
+//         throw(std::string("Failed to load tileset"));
+//     int tileWidth = 16;
+//     int tileHeight = 16;
+
+//     Camera cam{0, 0, 0.4, 0.4};
+
+//     std::thread listener(keyListener, std::ref(cam));
+
+//     int **bgLayer = Tilemaps::OneD2TwoD(Tilemaps::backgroundLayer, Tilemaps::WIDTH, Tilemaps::HEIGHT, sizeof(Tilemaps::backgroundLayer) / sizeof(int));
+//     int **objLayer = Tilemaps::OneD2TwoD(Tilemaps::objectLayer, Tilemaps::WIDTH, Tilemaps::HEIGHT, sizeof(Tilemaps::objectLayer) / sizeof(int));
+
+//     Tileset ts{"./assets/test/tileset.png", 16};
+
+//     while (true)
+//     {
+//         r.resetBuffer(Pixel{0, 0, 0});
+
+//         // * DRAWING CODE GOES HERE --------------------------------------->
+//         int camTileX = static_cast<int>(cam.x);
+//         int camTileY = static_cast<int>(cam.y);
+
+//         float camOffsetX = cam.x - camTileX;
+//         float camOffsetY = cam.y - camTileY;
+
+//         int tilesAcross = (r.width / tileWidth) + 2;
+//         int tilesDown = (r.height / tileHeight) + 2;
+
+//         for (int y = 0; y < tilesDown; ++y)
+//         {
+//             for (int x = 0; x < tilesAcross; ++x)
+//             {
+//                 int tileX = (x * tileWidth) - static_cast<int>(camOffsetX * tileWidth);
+//                 int tileY = (y * tileHeight) - static_cast<int>(camOffsetY * tileHeight);
+
+//                 int mapX = camTileX + x;
+//                 int mapY = camTileY + y;
+
+//                 if (mapX >= 0 && mapX < Tilemaps::WIDTH && mapY >= 0 && mapY < Tilemaps::HEIGHT)
+//                 {
+//                     int backgroundTile = bgLayer[mapY][mapX];
+//                     int objectTile = objLayer[mapY][mapX];
+
+//                     ts.renderTile(backgroundTile - 1, tileX, tileY, r);
+//                     ts.renderTile(objectTile - 1, tileX, tileY, r);
+//                 }
+//             }
+//         }
+
+//         //*---------------------------------------------------------------->
+//         r.swapBuffers();
+//         r.resetCursor();
+//         r.render();
+
+//         // cam.x += 0.01;
+
+//         std::this_thread::sleep_for(std::chrono::milliseconds(DELAY)); // Control main loop delay
+//     }
+
+//     // ! FREE TILES
+//     Tilemaps::deleteTwoDArray(bgLayer, Tilemaps::HEIGHT);
+//     Tilemaps::deleteTwoDArray(objLayer, Tilemaps::HEIGHT);
+
+//     listener.join();
+
+//     return EXIT_SUCCESS;
+// }
+
 int main()
 {
     // ! SEEDING
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
-    Renderer r{170, 128};
+    // Renderer r{170, 128};
+    Renderer r{64, 64};
 
     r.clearScreen();
     r.resetCursor();
-    // float DELAY_uS = (1 / 60.0f) * 1000000;
-    // int DELAY = 16;
-    int DELAY = 16;
 
-    // ! READY THE SPRITES
-    int tilesetWidth = 0;
-    int tilesetHeight = 0;
-    int tilesetChannels = 0;
-    unsigned char *tileset = stbi_load("./assets/test/tileset.png", &tilesetWidth, &tilesetHeight, &tilesetChannels, 4);
-    if (tileset == nullptr)
-        throw(std::string("Failed to load tileset"));
-    int tileWidth = 16;
-    int tileHeight = 16;
+    int DELAY = 1600;
 
-    Camera cam{0, 0, 0.4, 0.4};
-
-    std::thread listener(keyListener, std::ref(cam));
-
-    int **bgLayer = Tilemaps::OneD2TwoD(Tilemaps::backgroundLayer, Tilemaps::WIDTH, Tilemaps::HEIGHT, sizeof(Tilemaps::backgroundLayer) / sizeof(int));
-    int **objLayer = Tilemaps::OneD2TwoD(Tilemaps::objectLayer, Tilemaps::WIDTH, Tilemaps::HEIGHT, sizeof(Tilemaps::objectLayer) / sizeof(int));
-
-    Tileset ts{"./assets/test/tileset.png", 16};
+    int frameCount = 0;
 
     while (true)
     {
+        ++frameCount;
+
         r.resetBuffer(Pixel{0, 0, 0});
 
         // * DRAWING CODE GOES HERE --------------------------------------->
-        int camTileX = static_cast<int>(cam.x);
-        int camTileY = static_cast<int>(cam.y);
-
-        float camOffsetX = cam.x - camTileX;
-        float camOffsetY = cam.y - camTileY;
-
-        int tilesAcross = (r.width / tileWidth) + 2;
-        int tilesDown = (r.height / tileHeight) + 2;
-
-        for (int y = 0; y < tilesDown; ++y)
+        float radius = 64;
+        for (int y = 0; y < r.height; ++y)
         {
-            for (int x = 0; x < tilesAcross; ++x)
+            for (int x = 0; x < r.width; ++x)
             {
-                int tileX = (x * tileWidth) - static_cast<int>(camOffsetX * tileWidth);
-                int tileY = (y * tileHeight) - static_cast<int>(camOffsetY * tileHeight);
-
-                int mapX = camTileX + x;
-                int mapY = camTileY + y;
-
-                if (mapX >= 0 && mapX < Tilemaps::WIDTH && mapY >= 0 && mapY < Tilemaps::HEIGHT)
+                if (x * x + y * y <= radius * radius)
                 {
-                    int backgroundTile = bgLayer[mapY][mapX];
-                    int objectTile = objLayer[mapY][mapX];
-
-                    ts.renderTile(backgroundTile - 1, tileX, tileY, r);
-                    ts.renderTile(objectTile - 1, tileX, tileY, r);
+                    r.putPixel(x, y, {255, 0, 0, 255});
                 }
             }
         }
@@ -578,12 +631,6 @@ int main()
 
         std::this_thread::sleep_for(std::chrono::milliseconds(DELAY)); // Control main loop delay
     }
-
-    // ! FREE TILES
-    Tilemaps::deleteTwoDArray(bgLayer, Tilemaps::HEIGHT);
-    Tilemaps::deleteTwoDArray(objLayer, Tilemaps::HEIGHT);
-
-    listener.join();
 
     return EXIT_SUCCESS;
 }
