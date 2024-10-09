@@ -339,8 +339,10 @@ char getch()
 
 struct Camera
 {
-    int x;
-    int y;
+    float x;
+    float y;
+    float dx;
+    float dy;
 };
 
 void keyListener(Camera &cam)
@@ -356,19 +358,36 @@ void keyListener(Camera &cam)
             {
             case 'D':
             case 'd':
-                cam.x++;
+                cam.x += cam.dx;
                 break;
             case 'A':
             case 'a':
-                cam.x--;
+                cam.x -= cam.dx;
                 break;
             case 'W':
             case 'w':
-                cam.y--;
+                cam.y -= cam.dy;
                 break;
             case 'S':
             case 's':
-                cam.y++;
+                cam.y += cam.dy;
+                break;
+
+            case 'J':
+            case 'j':
+                cam.dx -= 0.1;
+                break;
+            case 'L':
+            case 'l':
+                cam.dx += 0.1;
+                break;
+            case 'I':
+            case 'i':
+                cam.dy -= 0.1;
+                break;
+            case 'K':
+            case 'k':
+                cam.dy += 0.1;
                 break;
             }
         }
@@ -387,7 +406,8 @@ int main()
     r.clearScreen();
     r.resetCursor();
     // float DELAY_uS = (1 / 60.0f) * 1000000;
-    int DELAY = 16;
+    // int DELAY = 16;
+    int DELAY = 1;
 
     // ! READY THE SPRITES
     int tilesetWidth = 0;
@@ -399,7 +419,7 @@ int main()
     int tileWidth = 16;
     int tileHeight = 16;
 
-    Camera cam{0, 0};
+    Camera cam{0, 0, 0.2, 0.2};
 
     std::thread listener(keyListener, std::ref(cam));
 
@@ -408,17 +428,29 @@ int main()
         r.resetBuffer(Pixel{0, 0, 0});
 
         // * DRAWING CODE GOES HERE --------------------------------------->
-        for (int y = 0; y < 8; ++y)
+        int camTileX = static_cast<int>(cam.x);
+        int camTileY = static_cast<int>(cam.y);
+
+        float camOffsetX = cam.x - camTileX;
+        float camOffsetY = cam.y - camTileY;
+
+        int tilesAcross = (r.width / tileWidth) + 2;
+        int tilesDown = (r.height / tileHeight) + 2;
+
+        for (int y = 0; y < tilesDown; ++y)
         {
-            for (int x = 0; x < 8; ++x)
+            for (int x = 0; x < tilesAcross; ++x)
             {
-                int mapX = cam.x + x;
-                int mapY = cam.y + y;
+                int tileX = (x * tileWidth) - static_cast<int>(camOffsetX * tileWidth);
+                int tileY = (y * tileHeight) - static_cast<int>(camOffsetY * tileHeight);
+
+                int mapX = camTileX + x;
+                int mapY = camTileY + y;
 
                 if (mapX >= 0 && mapX < Tilemap::WIDTH && mapY >= 0 && mapY < Tilemap::HEIGHT)
                 {
                     int tile = Tilemap::map[mapY][mapX];
-                    drawTile(tile - 1, x * 16, y * 16, tileset, tilesetWidth, tilesetHeight, tilesetChannels, Tilemap::TILE_SIZE, Tilemap::TILE_SIZE, r);
+                    drawTile(tile - 1, tileX, tileY, tileset, tilesetWidth, tilesetHeight, tilesetChannels, Tilemap::TILE_SIZE, Tilemap::TILE_SIZE, r);
                 }
             }
         }
