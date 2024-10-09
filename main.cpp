@@ -101,7 +101,13 @@ public:
     inline void putPixel(int x, int y, Pixel color)
     {
         if (x >= 0 && x < this->width && y >= 0 && y < this->height)
+        {
+            // * GET PREV VALUE
+            // * CHECK ALPHA
+            // FIXME: ADD SUPPORT FOR SEMI TRANSPARENT BACKGROUND
+            // Pixel &temp = this->buffer[y * this->width + x];
             this->buffer[y * this->width + x] = color;
+        }
     }
 
     void swapBuffers()
@@ -454,6 +460,8 @@ int main()
                 }
             }
         }
+
+        drawTile(1, 0, 0, tileset, tilesetWidth, tilesetHeight, tilesetChannels, tileWidth, tileHeight, r);
 
         //*---------------------------------------------------------------->
         r.swapBuffers();
