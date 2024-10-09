@@ -1,7 +1,7 @@
 #ifndef TILEMAP_4_RENDERER_H
 #define TILEMAP_4_RENDERER_H
 
-namespace Tilemap
+namespace Tilemaps
 {
     const int WIDTH = 40;
     const int HEIGHT = 30;

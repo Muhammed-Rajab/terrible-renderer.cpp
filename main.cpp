@@ -316,6 +316,63 @@ Pixel HSLtoPixel(int hue, float s, float l)
     return {(std::uint8_t)col.r, (std::uint8_t)col.g, (std::uint8_t)col.b};
 }
 
+//*-----------------------------------------
+//* TILEMAP
+//*-----------------------------------------
+class Tileset
+{
+
+public:
+    char *filename = nullptr;
+    unsigned char *data = nullptr;
+
+    int tilesetWidth = 0;
+    int tilesetHeight = 0;
+    int tilesetChannels = 0;
+    int TILE_SIZE;
+
+    Tileset(char *filename, int tile_size)
+    {
+        this->filename = filename;
+        this->TILE_SIZE = TILE_SIZE;
+        this->data = stbi_load(filename, &this->tilesetWidth, &this->tilesetHeight, &this->tilesetChannels, 4);
+        if (this->data == nullptr)
+            throw std::string("can't load image");
+    }
+
+    void renderTile(int n, int x, int y, Renderer &r)
+    {
+
+        int linearWidth = this->TILE_SIZE * n;
+
+        // ((Tw * n) // w) * h
+        int j0 = (linearWidth / this->tilesetWidth) * this->TILE_SIZE;
+
+        // ( Tw * n ) % w
+        int i0 = (linearWidth % this->tilesetWidth) * this->tilesetChannels;
+
+        int xTemp = x;
+        int yTemp = y;
+        for (int j = j0; j < j0 + 16; ++j)
+        {
+            int x0 = xTemp;
+            for (int i = i0; i < i0 + this->tilesetChannels * 16; i += this->tilesetChannels)
+            {
+                int index = j * this->tilesetWidth * this->tilesetChannels + i;
+
+                uint8_t red = this->data[index];
+                uint8_t green = this->data[index + 1];
+                uint8_t blue = this->data[index + 2];
+                uint8_t alpha = this->data[index + 3];
+
+                r.putPixel(x0, yTemp, {red, green, blue, alpha});
+                ++x0;
+            }
+            ++yTemp;
+        }
+    }
+};
+
 void drawTile(int n, int x, int y, unsigned char *tileset, int tilesetWidth, int tilesetHeight, int tilesetChannels, int tileWidth, int tileHeight, Renderer &r)
 {
 
@@ -468,8 +525,8 @@ int main()
 
     std::thread listener(keyListener, std::ref(cam));
 
-    int **bgLayer = Tilemap::OneD2TwoD(Tilemap::backgroundLayer, Tilemap::WIDTH, Tilemap::HEIGHT, sizeof(Tilemap::backgroundLayer) / sizeof(int));
-    int **objLayer = Tilemap::OneD2TwoD(Tilemap::objectLayer, Tilemap::WIDTH, Tilemap::HEIGHT, sizeof(Tilemap::objectLayer) / sizeof(int));
+    int **bgLayer = Tilemaps::OneD2TwoD(Tilemaps::backgroundLayer, Tilemaps::WIDTH, Tilemaps::HEIGHT, sizeof(Tilemaps::backgroundLayer) / sizeof(int));
+    int **objLayer = Tilemaps::OneD2TwoD(Tilemaps::objectLayer, Tilemaps::WIDTH, Tilemaps::HEIGHT, sizeof(Tilemaps::objectLayer) / sizeof(int));
 
     while (true)
     {
@@ -495,14 +552,14 @@ int main()
                 int mapX = camTileX + x;
                 int mapY = camTileY + y;
 
-                if (mapX >= 0 && mapX < Tilemap::WIDTH && mapY >= 0 && mapY < Tilemap::HEIGHT)
+                if (mapX >= 0 && mapX < Tilemaps::WIDTH && mapY >= 0 && mapY < Tilemaps::HEIGHT)
                 {
                     int backgroundTile = bgLayer[mapY][mapX];
                     int objectTile = objLayer[mapY][mapX];
 
-                    drawTile(backgroundTile - 1, tileX, tileY, tileset, tilesetWidth, tilesetHeight, tilesetChannels, Tilemap::TILE_SIZE, Tilemap::TILE_SIZE, r);
+                    drawTile(backgroundTile - 1, tileX, tileY, tileset, tilesetWidth, tilesetHeight, tilesetChannels, Tilemaps::TILE_SIZE, Tilemaps::TILE_SIZE, r);
 
-                    drawTile(objectTile - 1, tileX, tileY, tileset, tilesetWidth, tilesetHeight, tilesetChannels, Tilemap::TILE_SIZE, Tilemap::TILE_SIZE, r);
+                    drawTile(objectTile - 1, tileX, tileY, tileset, tilesetWidth, tilesetHeight, tilesetChannels, Tilemaps::TILE_SIZE, Tilemaps::TILE_SIZE, r);
                 }
             }
         }
@@ -518,8 +575,8 @@ int main()
     }
 
     // ! FREE TILES
-    Tilemap::deleteTwoDArray(bgLayer, Tilemap::HEIGHT);
-    Tilemap::deleteTwoDArray(objLayer, Tilemap::HEIGHT);
+    Tilemaps::deleteTwoDArray(bgLayer, Tilemaps::HEIGHT);
+    Tilemaps::deleteTwoDArray(objLayer, Tilemaps::HEIGHT);
 
     listener.join();
 
