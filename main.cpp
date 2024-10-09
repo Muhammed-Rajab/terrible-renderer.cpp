@@ -23,6 +23,7 @@ GOALS:
 #include <unistd.h>
 #include "include/hsl.h"
 #include "include/map.h"
+#include "include/character_map.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "include/stb_image.h"
@@ -79,8 +80,14 @@ public:
         {
             for (int x = 0; x < this->width; ++x)
             {
+
                 const Pixel &p = this->buffer[y * width + x];
+
+                // int brightness = static_cast<int>((0.299f * p.r + 0.587 * p.g + 0.114f * p.b));
+                // char pixel = CHARACTER_MAP[brightness];
+
                 oss << "\033[38;2;" << (unsigned int)p.r << ";" << (unsigned int)p.g << ";" << (unsigned int)p.b << "m" << "██";
+                // oss << pixel;
             }
             oss << "\n";
         }
@@ -439,7 +446,7 @@ int main()
     // ! SEEDING
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
-    Renderer r{256, 256};
+    Renderer r{170, 128};
 
     r.clearScreen();
     r.resetCursor();
@@ -505,7 +512,7 @@ int main()
         r.resetCursor();
         r.render();
 
-        cam.x += 0.1;
+        // cam.x += 0.01;
 
         std::this_thread::sleep_for(std::chrono::milliseconds(DELAY)); // Control main loop delay
     }
