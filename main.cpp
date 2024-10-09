@@ -346,7 +346,6 @@ public:
 
     void renderTile(int n, int x, int y, Renderer &r)
     {
-
         int linearWidth = this->TILE_SIZE * n;
 
         // ((Tw * n) // w) * h
@@ -376,40 +375,6 @@ public:
         }
     }
 };
-
-void drawTile(int n, int x, int y, unsigned char *tileset, int tilesetWidth, int tilesetHeight, int tilesetChannels, int tileWidth, int tileHeight, Renderer &r)
-{
-
-    int linearWidth = tileWidth * n;
-
-    // ((Tw * n) // w) * h
-    int j0 = (linearWidth / tilesetWidth) * tileHeight;
-
-    // ( Tw * n ) % w
-    int i0 = (linearWidth % tilesetWidth) * tilesetChannels;
-
-    // std::cout << "X: " << i0 << " Y: " << j0 << "\n";
-
-    int xTemp = x;
-    int yTemp = y;
-    for (int j = j0; j < j0 + 16; ++j)
-    {
-        int x0 = xTemp;
-        for (int i = i0; i < i0 + tilesetChannels * 16; i += tilesetChannels)
-        {
-            int index = j * tilesetWidth * tilesetChannels + i;
-
-            uint8_t red = tileset[index];
-            uint8_t green = tileset[index + 1];
-            uint8_t blue = tileset[index + 2];
-            uint8_t alpha = tileset[index + 3];
-
-            r.putPixel(x0, yTemp, {red, green, blue, alpha});
-            ++x0;
-        }
-        ++yTemp;
-    }
-}
 
 bool kbhit()
 {
