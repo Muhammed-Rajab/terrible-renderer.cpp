@@ -177,23 +177,51 @@ void keyListener(Camera &cam, Renderer &r)
 //     return EXIT_SUCCESS;
 // }
 
+struct Vec3
+{
+    float x;
+    float y;
+    float z;
+};
+
+Vec3 getColor(float x)
+{
+    Vec3 A = {0.5, 0.5, 0.5};
+    Vec3 B = {0.5, 0.5, 0.5};
+    Vec3 C = {1.0, 1.0, 1.0};
+    Vec3 D = {0.00, 0.10, 0.20};
+
+    Vec3 c = {
+        A.x + B.x * std::cos(2 * 3.14159 * (C.x * x + D.x)),
+        A.y + B.y * std::cos(2 * 3.14159 * (C.y * x + D.y)),
+        A.z + B.z * std::cos(2 * 3.14159 * (C.z * x + D.z)),
+    };
+
+    return c;
+}
+
 int main()
 {
     // ! SEEDING
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
     // Renderer r{170, 128};
-    Renderer r{200, 200};
+    // Renderer r{200, 200};
+    // Renderer r{64, 64};
+    Renderer r{128, 128};
+    // Renderer r{64, 64};
 
     r.clearScreen();
     r.resetCursor();
 
-    int DELAY = 1600;
+    int DELAY = 16;
 
     int frameCount = 0;
 
     int W2 = r.width / 2;
     int H2 = r.width / 2;
+
+    double angle = 0;
 
     while (true)
     {
@@ -202,43 +230,21 @@ int main()
         r.resetBuffer(Pixel{0, 0, 0});
 
         // * DRAWING CODE GOES HERE --------------------------------------->
-        float radius = 50;
+        float lightX = 0;
+        float lightY = 0;
+        float lightZ = -30;
 
-        float lightX = -65;
-        float lightY = 65;
-        float lightZ = -65;
+        float radius = 64;
 
         for (int y = -H2; y < H2; ++y)
         {
             for (int x = -W2; x < W2; ++x)
             {
+
                 if (x * x + y * y <= radius * radius)
                 {
-                    // * Calculate normal
-                    float nx = (float)x / radius;
-                    float ny = (float)y / radius;
-                    float nz = std::sqrt(1.0f - (nx * nx + ny * ny));
-                    float nm = sqrt(nx * nx + ny * ny + nz * nz);
 
-                    nx /= nm;
-                    ny /= nm;
-                    nz /= nm;
-
-                    float intensity = 0.005;
-                    float power = nx * -(lightX * intensity) + ny * -(lightY * intensity) + nz * -(lightZ * intensity);
-
-                    Pixel color = {
-                        std::max(0, std::min(255, (int)(255 * power))),
-                        0,
-                        0,
-                        255,
-                    };
-
-                    // unsigned char red = std::min(255, (int)(255 * (nx * 0.5 + 0.5) * power));
-                    // unsigned char green = std::min(255, (int)(255 * (ny * 0.5 + 0.5) * power));
-                    // unsigned char blue = std::min(255, (int)(255 * (nz * 0.5 + 0.5) * power));
-
-                    r.putPixel(W2 + x, H2 + y, color);
+                    r.putPixel(W2 + x, H2 + y, {255, 255, 255});
                 }
             }
         }
@@ -249,6 +255,7 @@ int main()
         r.render();
 
         // cam.x += 0.01;
+        angle += 0.001;
 
         std::this_thread::sleep_for(std::chrono::milliseconds(DELAY)); // Control main loop delay
     }
