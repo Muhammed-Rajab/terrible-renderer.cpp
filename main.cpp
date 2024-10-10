@@ -87,7 +87,8 @@ public:
                 // char pixel = CHARACTER_MAP[brightness];
 
                 oss << "\033[38;2;" << (unsigned int)p.r << ";" << (unsigned int)p.g << ";" << (unsigned int)p.b << "m" << "██";
-                // oss << pixel;
+                // oss << "\033[38;2;" << (unsigned int)p.r << ";" << (unsigned int)p.g << ";" << (unsigned int)p.b << "m" << pixel << pixel;
+                // oss << pixel << pixel;
             }
             oss << "\n";
         }
@@ -356,7 +357,7 @@ char getch()
     return c;
 }
 
-void keyListener(Camera &cam)
+void keyListener(Camera &cam, Renderer &r)
 {
     while (true)
     {
@@ -498,7 +499,7 @@ int main()
 
     Camera cam{0, 0, 0.4, 0.4};
 
-    std::thread listener(keyListener, std::ref(cam));
+    std::thread listener(keyListener, std::ref(cam), std::ref(r));
 
     int **bgLayer = Tilemaps::OneD2TwoD(Tilemaps::backgroundLayer, Tilemaps::WIDTH, Tilemaps::HEIGHT, sizeof(Tilemaps::backgroundLayer) / sizeof(int));
     int **objLayer = Tilemaps::OneD2TwoD(Tilemaps::objectLayer, Tilemaps::WIDTH, Tilemaps::HEIGHT, sizeof(Tilemaps::objectLayer) / sizeof(int));
