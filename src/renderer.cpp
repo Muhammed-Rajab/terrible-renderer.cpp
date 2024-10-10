@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include "../include/renderer.h"
+#include "../include/character_map.h"
 
 //*---------------------------------------
 //* PIXELS
@@ -47,12 +48,19 @@ void Renderer::render()
         for (int x = 0; x < this->width; ++x)
         {
 
-            const Pixel &p = this->buffer[y * width + x];
+            Pixel &p = this->buffer[y * width + x];
+
+            // HACK: COLOR CLAMPING
+            p.r = std::max(0, std::min(255, (int)p.r));
+            p.g = std::max(0, std::min(255, (int)p.g));
+            p.b = std::max(0, std::min(255, (int)p.b));
+            p.a = std::max(0, std::min(255, (int)p.a));
 
             // int brightness = static_cast<int>((0.299f * p.r + 0.587 * p.g + 0.114f * p.b));
             // char pixel = CHARACTER_MAP[brightness];
 
             oss << "\033[38;2;" << (unsigned int)p.r << ";" << (unsigned int)p.g << ";" << (unsigned int)p.b << "m" << "██";
+
             // oss << "\033[38;2;" << (unsigned int)p.r << ";" << (unsigned int)p.g << ";" << (unsigned int)p.b << "m" << pixel << pixel;
             // oss << pixel << pixel;
         }
