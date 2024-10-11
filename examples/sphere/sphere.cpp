@@ -186,15 +186,12 @@ int main()
     };
 
     // ! CHANGE THIS TO CHANGE THE BUFFER SIZE
-    // Renderer r{96, 96};
-    Renderer r{192, 192};
+    Renderer r{96, 96};
 
     r.clearScreen();
     r.resetCursor();
 
     int DELAY = 16;
-
-    int frameCount = 0;
 
     int W2 = r.width / 2;
     int H2 = r.width / 2;
@@ -208,14 +205,12 @@ int main()
 
     while (true)
     {
-        ++frameCount;
-
         r.resetBuffer(Pixel{0, 0, 0});
 
         // * DRAWING CODE GOES HERE --------------------------------------->
 
         // * SIMPLE BOUNCING EFFECT
-        float radius = 92.0f;
+        float radius = 44.0f;
         // float radius = 44.0f;
         // float radius = 44.0f * std::sin(clamp(0.785, 2.35, zoom));
 
@@ -242,13 +237,13 @@ int main()
                     lightDirection.normalize();
 
                     // * AMBIENT LIGHTING
-                    float ambientLightingPower = 0.1f;
+                    float ambientLightingPower = 0.15f;
 
                     // * DIFFUSE LIGHTING
                     float diffusePower = getDiffusePower(normal, lightDirection);
 
                     // * SPECULAR LIGHTING
-                    float specularComponent = getSpecularComponent(normal, lightDirection, 40.0f);
+                    float specularComponent = getSpecularComponent(normal, lightDirection, 38.0f);
 
                     // * FINAL INTENSITY
                     float globalIntensity = 0.9f;
