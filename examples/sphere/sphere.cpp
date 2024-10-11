@@ -60,12 +60,14 @@ struct Vec3
     }
 };
 
-Vec3 calculateSphereNormal(float x, float y, float z, float radius)
+Vec3 calculateSphereNormal(float x, float y, float radius)
 {
+    float newX = float(x) / radius;
+    float newY = float(y) / radius;
     return Vec3{
-        float(x) / radius,
-        float(y) / radius,
-        std::sqrt(1.0f - (x * x + y * y)),
+        newX,
+        newY,
+        std::sqrt(1.0f - (newX * newX + newY * newY)),
     };
 }
 
@@ -104,10 +106,6 @@ int main()
             -400.0f * std::sin(angle),
         };
 
-        float lightX = -300.0f * std::cos(angle);
-        float lightY = -300;
-        float lightZ = -400.0f * std::sin(angle);
-
         float radius = 100;
 
         for (int y = -H2; y < H2; ++y)
@@ -116,41 +114,23 @@ int main()
             {
                 if (x * x + y * y <= radius * radius)
                 {
+                    Vec3 pos = {x, y, 0};
 
                     // * CALCULATE NORMAL
-                    float nx = (float)x / radius;
-                    float ny = (float)y / radius;
-                    float nz = std::sqrt(1.0f - (nx * nx + ny * ny));
-                    float nm = std::sqrt(nx * nx + ny * ny + nz * nz);
-
-                    // * NORMALIZE NORMAL VECTOR
-                    nx /= nm;
-                    ny /= nm;
-                    nz /= nm;
+                    Vec3 normal = calculateSphereNormal(x, y, radius);
+                    normal.normalize();
 
                     // * GET LIGHT DIRECTION VECTOR
-                    float lightDirX = lightX - x;
-                    float lightDirY = lightY - y;
-                    float lightDirZ = lightZ;
-                    float lightDirMag = std::sqrt(lightDirX * lightDirX + lightDirY * lightDirY + lightDirZ * lightDirZ);
-
-                    // * NORMALIZE LIGHT DIRECTION VECTOR
-                    lightDirX /= lightDirMag;
-                    lightDirY /= lightDirMag;
-                    lightDirZ /= lightDirMag;
+                    Vec3 lightDirection = light.sub(pos);
+                    lightDirection.normalize();
 
                     // * GET REFLECTION VECTOR
-                    float TWO_N_dot_L = 2 * (nx * lightDirX + ny * lightDirY + nz * lightDirZ);
-                    float reflectionX = TWO_N_dot_L * nx - lightDirX;
-                    float reflectionY = TWO_N_dot_L * ny - lightDirY;
-                    float reflectionZ = TWO_N_dot_L * nz - lightDirZ;
+                    float TWO_N_dot_L = 2 * (normal.dot(lightDirection));
+                    Vec3 reflectionVector = (normal.scale(TWO_N_dot_L)).sub(lightDirection);
 
                     // * VIEW DIRECTION VECTOR
-                    float ViewX = 0;
-                    float ViewY = 0;
-                    float ViewZ = 1;
-
-                    float V_dot_R = ViewX * reflectionX + ViewY * reflectionY + ViewZ * reflectionZ;
+                    Vec3 viewVector = {0, 0, 1};
+                    float V_dot_R = viewVector.dot(reflectionVector);
 
                     // * GET SPECULAR FACTOR
                     float shininess = 40.0f;
@@ -158,7 +138,7 @@ int main()
                     float specular_component = std::pow(specular_factor, shininess);
 
                     // * CALCULATE DIFFUSE LIGHTING POWER
-                    float diffuse_power = std::max(0.0f, (nx * lightDirX + ny * lightDirY + nz * lightDirZ));
+                    float diffuse_power = std::max(0.0f, normal.dot(lightDirection));
                     ;
 
                     // ! NORMAL MAP VISUALIZATION
