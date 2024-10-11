@@ -3,6 +3,14 @@
 #include <iostream>
 #include "renderer.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+float clamp(float min, float max, float val)
+{
+    return std::max(min, std::min(max, val));
+}
+
 struct Vec3
 {
     float x;
@@ -58,28 +66,117 @@ struct Vec3
     {
         return *this;
     }
+
+    Pixel toPixel(int alpha)
+    {
+        return {
+            clamp(0, 255, this->x),
+            clamp(0, 255, this->y),
+            clamp(0, 255, this->z),
+            clamp(0, 255, alpha),
+        };
+    }
 };
 
 Vec3 calculateSphereNormal(float x, float y, float radius)
 {
-    float newX = float(x) / radius;
-    float newY = float(y) / radius;
+    float nx = float(x) / radius;
+    float ny = float(y) / radius;
     return Vec3{
-        newX,
-        newY,
-        std::sqrt(1.0f - (newX * newX + newY * newY)),
+        nx,
+        ny,
+        std::sqrt(1.0f - (nx * nx + ny * ny)),
     };
+}
+
+float getSpecularComponent(Vec3 &normal, Vec3 &lightDirection, float shininess)
+{
+    float TWO_N_dot_L = 2 * (normal.dot(lightDirection));
+    Vec3 reflectionVector = (normal.scale(TWO_N_dot_L)).sub(lightDirection);
+
+    // * VIEW DIRECTION VECTOR
+    Vec3 viewVector = {0, 0, 1};
+
+    // * GET SPECULAR FACTOR
+    float specular_factor = std::max(0.0f, viewVector.dot(reflectionVector));
+    float specular_component = std::pow(specular_factor, shininess);
+
+    return specular_component;
+}
+
+float getDiffusePower(Vec3 &normal, Vec3 &lightDirection)
+{
+    return std::max(0.0f, normal.dot(lightDirection));
+}
+
+std::pair<float, float> getUV(Vec3 normal)
+{
+    float u = 0.5 + std::atan2(normal.z, normal.x) / (2 * M_PI);
+    float v = 0.5 - normal.y * 0.5f;
+
+    return {u, v};
+}
+
+std::pair<int, int> getTextCoords(Vec3 &normal, int textureWidth, int textureHeight)
+{
+    auto [u, v] = getUV(normal);
+
+    u = clamp(0.0f, 1.0f, u);
+    v = clamp(0.0f, 1.0f, v);
+
+    int texX = u * (textureWidth - 1);
+    int texY = v * (textureHeight - 1);
+
+    texX = clamp(0, textureWidth - 1, texX);
+    texY = clamp(0, textureHeight - 1, texY);
+
+    return {texX, texY};
+}
+
+Pixel getTexturedColor(Vec3 &normal, float intensity, unsigned char *texture, int width, int height, int channels, Renderer &r)
+{
+    // TODO: TEXTURE
+    auto [texX, texY] = getTextCoords(normal, width, height);
+
+    int index = texY * width * channels + texX * channels;
+
+    Vec3 colorV = {
+        texture[index],
+        texture[index + 1],
+        texture[index + 2],
+    };
+
+    return colorV.scale(intensity).toPixel(255);
+}
+
+Pixel getProbabilisticColor(float intensity)
+{
+    Vec3 colorV;
+    int prob = rand() % 100;
+    if (prob < 33)
+    {
+        colorV = {103, 11, 156};
+    }
+    else if (prob < 66)
+    {
+        colorV = {255, 255, 255};
+    }
+    else
+    {
+        colorV = {135, 224, 18};
+    }
+    return colorV.scale(intensity).toPixel(255);
+}
+
+Pixel getFixedColor(Vec3 color, float intensity)
+{
+    return color.scale(intensity).toPixel(255);
 }
 
 int main()
 {
 
-    // Renderer r{170, 128};
-    // Renderer r{200, 200};
-    // Renderer r{64, 64};
-    // Renderer r{96, 96};
-    Renderer r{220, 220};
-    // Renderer r{32, 32};
+    Renderer r{96, 96};
 
     r.clearScreen();
     r.resetCursor();
@@ -91,7 +188,12 @@ int main()
     int W2 = r.width / 2;
     int H2 = r.width / 2;
 
-    double angle = -1.57;
+    double angle = -1.57f;
+    double zoom = 0.785f;
+
+    // * LOADING TEXTURE
+    int width = 0, height = 0, channels = 0;
+    unsigned char *texture = stbi_load("assets/test/texture.jpg", &width, &height, &channels, 3);
 
     while (true)
     {
@@ -100,13 +202,18 @@ int main()
         r.resetBuffer(Pixel{0, 0, 0});
 
         // * DRAWING CODE GOES HERE --------------------------------------->
+
+        // * SIMPLE BOUNCING EFFECT
+        // float radius = 44.0f;
+        // float radius = 100.0f;
+        float radius = 44.0f * std::sin(clamp(0.785, 2.35, zoom));
+        // float radius = 100.0f * std::sin(clamp(0.785, 2.35, zoom));
+
         Vec3 light = {
             -300.0f * std::cos(angle),
             -300,
-            -400.0f * std::sin(angle),
+            -300.0f * std::sin(angle),
         };
-
-        float radius = 100;
 
         for (int y = -H2; y < H2; ++y)
         {
@@ -124,47 +231,34 @@ int main()
                     Vec3 lightDirection = light.sub(pos);
                     lightDirection.normalize();
 
-                    // * GET REFLECTION VECTOR
-                    float TWO_N_dot_L = 2 * (normal.dot(lightDirection));
-                    Vec3 reflectionVector = (normal.scale(TWO_N_dot_L)).sub(lightDirection);
+                    // * AMBIENT LIGHTING
+                    float ambientLightingPower = 0.1f;
 
-                    // * VIEW DIRECTION VECTOR
-                    Vec3 viewVector = {0, 0, 1};
-                    float V_dot_R = viewVector.dot(reflectionVector);
+                    // * DIFFUSE LIGHTING
+                    float diffusePower = getDiffusePower(normal, lightDirection);
 
-                    // * GET SPECULAR FACTOR
-                    float shininess = 40.0f;
-                    float specular_factor = std::max(0.0f, V_dot_R);
-                    float specular_component = std::pow(specular_factor, shininess);
+                    // * SPECULAR LIGHTING
+                    float specularComponent = getSpecularComponent(normal, lightDirection, 40.0f);
 
-                    // * CALCULATE DIFFUSE LIGHTING POWER
-                    float diffuse_power = std::max(0.0f, normal.dot(lightDirection));
-                    ;
+                    // * FINAL INTENSITY
+                    float globalIntensity = 0.9f;
+                    float finalIntensity = globalIntensity * (diffusePower + specularComponent + ambientLightingPower);
 
-                    // ! NORMAL MAP VISUALIZATION
-                    // Pixel color = {
-                    //     (unsigned char)(std::max(0.0f, std::min(255.0f, (nx + 1) * 0.5f * 255.0f))),
-                    //     (unsigned char)(std::max(0.0f, std::min(255.0f, (ny + 1) * 0.5f * 255.0f))),
-                    //     (unsigned char)(std::max(0.0f, std::min(255.0f, (nz + 1) * 0.5f * 255.0f))),
-                    //     (255),
-                    // };
+                    // * SHADING PART
 
-                    //* FINAL INTENSITY
-                    float globalIntensity = .9f;
-                    float finalIntensity = globalIntensity * (diffuse_power + specular_component + 0.1f);
+                    Pixel color = {0, 0, 0};
 
-                    Pixel color = {
-                        (unsigned char)(std::max(0.0f, std::min(255.0f, 103 * finalIntensity))),
-                        (unsigned char)(std::max(0.0f, std::min(255.0f, 11 * finalIntensity))),
-                        (unsigned char)(std::max(0.0f, std::min(255.0f, 156 * finalIntensity))),
-                        255,
-                    };
+                    // color = getTexturedColor(normal, finalIntensity, texture, width, height, channels, r);
+                    // color = getProbabilisticColor(finalIntensity);
+                    color = getFixedColor({255, 255, 255}, finalIntensity);
 
                     r.putPixel(W2 + x, H2 + y, color);
                 }
                 else
                 {
-                    r.putPixel(W2 + x, H2 + y, {20, 2, 31, 255});
+                    r.putPixel(W2 + x, H2 + y, {35, 35, 35, 255});
+                    // r.putPixel(W2 + x, H2 + y, {20, 2, 31, 255});
+                    // r.putPixel(W2 + x, H2 + y, {25, 41, 4, 255});
                 }
             }
         }
@@ -174,7 +268,13 @@ int main()
         r.resetCursor();
         r.render();
 
-        angle += 0.01;
+        angle += 0.05;
+        zoom += 0.01;
+
+        if (zoom > 2.35)
+        {
+            zoom = 0.785;
+        }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(DELAY));
     }
