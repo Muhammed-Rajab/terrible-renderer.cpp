@@ -175,8 +175,19 @@ Pixel getFixedColor(Vec3 color, float intensity)
 
 int main()
 {
+    // ! CHANGE THE INDEX TO GET EXAMPLES
+    int currentExample = 2;
+
+    Pixel backgrounds[] = {
+        {236, 197, 137, 255},
+        {19, 3, 28, 255},
+        {35, 35, 35, 255},
+        {19, 3, 28, 255},
+    };
+
     // ! CHANGE THIS TO CHANGE THE BUFFER SIZE
-    Renderer r{96, 96};
+    // Renderer r{96, 96};
+    Renderer r{192, 192};
 
     r.clearScreen();
     r.resetCursor();
@@ -204,8 +215,9 @@ int main()
         // * DRAWING CODE GOES HERE --------------------------------------->
 
         // * SIMPLE BOUNCING EFFECT
+        float radius = 92.0f;
         // float radius = 44.0f;
-        float radius = 44.0f * std::sin(clamp(0.785, 2.35, zoom));
+        // float radius = 44.0f * std::sin(clamp(0.785, 2.35, zoom));
 
         Vec3 light = {
             -300.0f * std::cos(angle),
@@ -245,18 +257,28 @@ int main()
                     // * SHADING PART
                     Pixel color = {0, 0, 0};
 
-                    // ! UNCOMMENT TO GET TEXTURED SPHERE
-                    // color = getTexturedColor(normal, finalIntensity, texture, width, height, channels, r);
-                    // ! UNCOMMENT TO GET RANDOMLY COLORED SPHERE
-                    // color = getProbabilisticColor(finalIntensity);
-                    // ! UNCOMMENT TO GET SOLID SPHERE[personal fav:)]
-                    color = getFixedColor({255, 255, 255}, finalIntensity);
+                    switch (currentExample)
+                    {
+                    case 0:
+                        color = getTexturedColor(normal, finalIntensity, texture, width, height, channels, r);
+                        break;
+                    case 1:
+                        color = getProbabilisticColor(finalIntensity);
+                        break;
+                    case 2:
+                        color = getFixedColor({255, 255, 255}, finalIntensity);
+                        break;
+                    case 3:
+                        color = getFixedColor({103, 11, 156}, finalIntensity);
+                        break;
+                    }
 
                     r.putPixel(W2 + x, H2 + y, color);
                 }
                 else
                 {
-                    r.putPixel(W2 + x, H2 + y, {35, 35, 35, 255});
+                    // ! POTENTIAL ERROR
+                    r.putPixel(W2 + x, H2 + y, backgrounds[currentExample]);
                 }
             }
         }
