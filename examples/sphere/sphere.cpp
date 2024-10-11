@@ -175,7 +175,7 @@ Pixel getFixedColor(Vec3 color, float intensity)
 
 int main()
 {
-
+    // ! CHANGE THIS TO CHANGE THE BUFFER SIZE
     Renderer r{96, 96};
 
     r.clearScreen();
@@ -193,7 +193,7 @@ int main()
 
     // * LOADING TEXTURE
     int width = 0, height = 0, channels = 0;
-    unsigned char *texture = stbi_load("assets/test/texture.jpg", &width, &height, &channels, 3);
+    unsigned char *texture = stbi_load("assets/sphere/texture.jpg", &width, &height, &channels, 3);
 
     while (true)
     {
@@ -205,9 +205,7 @@ int main()
 
         // * SIMPLE BOUNCING EFFECT
         // float radius = 44.0f;
-        // float radius = 100.0f;
         float radius = 44.0f * std::sin(clamp(0.785, 2.35, zoom));
-        // float radius = 100.0f * std::sin(clamp(0.785, 2.35, zoom));
 
         Vec3 light = {
             -300.0f * std::cos(angle),
@@ -245,11 +243,13 @@ int main()
                     float finalIntensity = globalIntensity * (diffusePower + specularComponent + ambientLightingPower);
 
                     // * SHADING PART
-
                     Pixel color = {0, 0, 0};
 
+                    // ! UNCOMMENT TO GET TEXTURED SPHERE
                     // color = getTexturedColor(normal, finalIntensity, texture, width, height, channels, r);
+                    // ! UNCOMMENT TO GET RANDOMLY COLORED SPHERE
                     // color = getProbabilisticColor(finalIntensity);
+                    // ! UNCOMMENT TO GET SOLID SPHERE[personal fav:)]
                     color = getFixedColor({255, 255, 255}, finalIntensity);
 
                     r.putPixel(W2 + x, H2 + y, color);
@@ -257,8 +257,6 @@ int main()
                 else
                 {
                     r.putPixel(W2 + x, H2 + y, {35, 35, 35, 255});
-                    // r.putPixel(W2 + x, H2 + y, {20, 2, 31, 255});
-                    // r.putPixel(W2 + x, H2 + y, {25, 41, 4, 255});
                 }
             }
         }
