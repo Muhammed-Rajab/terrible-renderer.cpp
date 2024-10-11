@@ -184,17 +184,18 @@ struct Vec3
     float z;
 };
 
-Vec3 getColor(float x)
+Pixel getColor(float x)
 {
     Vec3 A = {0.5, 0.5, 0.5};
     Vec3 B = {0.5, 0.5, 0.5};
     Vec3 C = {1.0, 1.0, 1.0};
     Vec3 D = {0.00, 0.10, 0.20};
 
-    Vec3 c = {
-        A.x + B.x * std::cos(2 * 3.14159 * (C.x * x + D.x)),
-        A.y + B.y * std::cos(2 * 3.14159 * (C.y * x + D.y)),
-        A.z + B.z * std::cos(2 * 3.14159 * (C.z * x + D.z)),
+    Pixel c = {
+        A.x + B.x * std::cos(2 * 3.14159 * (C.x * x + D.x)) * 255,
+        A.y + B.y * std::cos(2 * 3.14159 * (C.y * x + D.y)) * 255,
+        A.z + B.z * std::cos(2 * 3.14159 * (C.z * x + D.z)) * 255,
+        255,
     };
 
     return c;
@@ -208,8 +209,9 @@ int main()
     // Renderer r{170, 128};
     // Renderer r{200, 200};
     // Renderer r{64, 64};
-    Renderer r{128, 128};
-    // Renderer r{64, 64};
+    Renderer r{96, 96};
+    // Renderer r{220, 220};
+    // Renderer r{32, 32};
 
     r.clearScreen();
     r.resetCursor();
@@ -221,7 +223,7 @@ int main()
     int W2 = r.width / 2;
     int H2 = r.width / 2;
 
-    double angle = 0;
+    double angle = -1.57;
 
     while (true)
     {
@@ -230,21 +232,87 @@ int main()
         r.resetBuffer(Pixel{0, 0, 0});
 
         // * DRAWING CODE GOES HERE --------------------------------------->
-        float lightX = 0;
-        float lightY = 0;
-        float lightZ = -30;
+        float lightX = -300.0f * std::cos(angle);
+        float lightY = -300;
+        float lightZ = -400.0f * std::sin(angle);
 
-        float radius = 64;
+        float radius = 42;
 
         for (int y = -H2; y < H2; ++y)
         {
             for (int x = -W2; x < W2; ++x)
             {
-
                 if (x * x + y * y <= radius * radius)
                 {
 
-                    r.putPixel(W2 + x, H2 + y, {255, 255, 255});
+                    // * CALCULATE NORMAL
+                    float nx = (float)x / radius;
+                    float ny = (float)y / radius;
+                    float nz = std::sqrt(1.0f - (nx * nx + ny * ny));
+                    float nm = std::sqrt(nx * nx + ny * ny + nz * nz);
+
+                    // * NORMALIZE NORMAL VECTOR
+                    nx /= nm;
+                    ny /= nm;
+                    nz /= nm;
+
+                    // * GET LIGHT DIRECTION VECTOR
+                    float lightDirX = lightX - x;
+                    float lightDirY = lightY - y;
+                    float lightDirZ = lightZ;
+                    float lightDirMag = std::sqrt(lightDirX * lightDirX + lightDirY * lightDirY + lightDirZ * lightDirZ);
+
+                    // * NORMALIZE LIGHT DIRECTION VECTOR
+                    lightDirX /= lightDirMag;
+                    lightDirY /= lightDirMag;
+                    lightDirZ /= lightDirMag;
+
+                    // * GET REFLECTION VECTOR
+                    float TWO_N_dot_L = 2 * (nx * lightDirX + ny * lightDirY + nz * lightDirZ);
+                    float reflectionX = TWO_N_dot_L * nx - lightDirX;
+                    float reflectionY = TWO_N_dot_L * ny - lightDirY;
+                    float reflectionZ = TWO_N_dot_L * nz - lightDirZ;
+
+                    // * VIEW DIRECTION VECTOR
+                    float ViewX = 0;
+                    float ViewY = 0;
+                    float ViewZ = 1;
+
+                    float V_dot_R = ViewX * reflectionX + ViewY * reflectionY + ViewZ * reflectionZ;
+
+                    // * GET SPECULAR FACTOR
+                    float shininess = 40.0f;
+                    float specular_factor = std::max(0.0f, V_dot_R);
+                    float specular_component = std::pow(specular_factor, shininess);
+
+                    // * CALCULATE DIFFUSE LIGHTING POWER
+                    float diffuse_power = std::max(0.0f, (nx * lightDirX + ny * lightDirY + nz * lightDirZ));
+                    ;
+
+                    // ! NORMAL MAP VISUALIZATION
+                    // Pixel color = {
+                    //     (unsigned char)(std::max(0.0f, std::min(255.0f, (nx + 1) * 0.5f * 255.0f))),
+                    //     (unsigned char)(std::max(0.0f, std::min(255.0f, (ny + 1) * 0.5f * 255.0f))),
+                    //     (unsigned char)(std::max(0.0f, std::min(255.0f, (nz + 1) * 0.5f * 255.0f))),
+                    //     (255),
+                    // };
+
+                    //* FINAL INTENSITY
+                    float globalIntensity = .9f;
+                    float finalIntensity = globalIntensity * (diffuse_power + specular_component + 0.1f);
+
+                    Pixel color = {
+                        (unsigned char)(std::max(0.0f, std::min(255.0f, 103 * finalIntensity))),
+                        (unsigned char)(std::max(0.0f, std::min(255.0f, 11 * finalIntensity))),
+                        (unsigned char)(std::max(0.0f, std::min(255.0f, 156 * finalIntensity))),
+                        255,
+                    };
+
+                    r.putPixel(W2 + x, H2 + y, color);
+                }
+                else
+                {
+                    r.putPixel(W2 + x, H2 + y, {20, 2, 31, 255});
                 }
             }
         }
@@ -255,7 +323,8 @@ int main()
         r.render();
 
         // cam.x += 0.01;
-        angle += 0.001;
+
+        angle += 0.01;
 
         std::this_thread::sleep_for(std::chrono::milliseconds(DELAY)); // Control main loop delay
     }
