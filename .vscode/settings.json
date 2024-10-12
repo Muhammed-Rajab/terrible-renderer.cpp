@@ -1,3 +1,9 @@
 {
-  "todo-tree.tree.showCountsInTree": true
+  "todo-tree.tree.showCountsInTree": true,
+  "files.associations": {
+    "*.ejs": "html",
+    "*.css": "css",
+    "thread": "cpp",
+    "string": "cpp"
+  }
 }

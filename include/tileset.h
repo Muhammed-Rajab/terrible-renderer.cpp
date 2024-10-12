@@ -25,7 +25,6 @@ public:
         this->data = stbi_load(filename, &this->tilesetWidth, &this->tilesetHeight, &this->tilesetChannels, 4);
         if (this->data == nullptr)
             throw std::string("can't load image");
-
         // std::cout << "Tileset Width: " << this->tilesetWidth << "\n";
         // std::cout << "Tileset Height: " << this->tilesetHeight << "\n";
         // std::cout << "Tileset Channels: " << this->tilesetChannels << "\n";
