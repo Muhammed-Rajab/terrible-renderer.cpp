@@ -156,8 +156,14 @@ int main()
                     // std::cout << "tile_x: " << tileX << "\n";
                     // std::cout << "tile_y: " << tileY << "\n";
 
-                    // ts.renderTile(backgroundTile - 1, tileX, tileY, r);
-                    ts.renderTile(objectTile, tileX, tileY, r);
+                    if (backgroundTile != 0)
+                    {
+                        ts.renderTile(backgroundTile - 1, tileX, tileY, r);
+                    }
+                    if (objectTile != 0)
+                    {
+                        ts.renderTile(objectTile - 1, tileX, tileY, r);
+                    }
                 }
             }
         }
