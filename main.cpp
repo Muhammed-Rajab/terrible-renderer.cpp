@@ -124,7 +124,7 @@ int main()
 
     // TODO: IMPLEMENT A WAY TO GET SPRITE BY INDEX
 
-    Tileset ts{"./assets/game/tileset.png", 16};
+    // Tileset ts{"./assets/game/tileset.png", 16};
 
     int tilesetWidth = 0;
     int tilesetHeight = 0;
@@ -158,18 +158,37 @@ int main()
         }
     }
 
+    // std::vector<std::vector<Pixel>> tile(TILE_SIZE);
+    // for (int i = 0; i < tilesetHeight; ++i)
+    // {
+    //     tile[i].reserve(TILE_SIZE);
+    // }
+
+    int n = 1;
+
+    int i0 = (TILE_SIZE * n) % tilesetWidth;
+    int j0 = ((TILE_SIZE * n) / tilesetWidth) * TILE_SIZE;
+
+    std::cout << "n: " << n << "\n";
+    std::cout << "i0: " << i0 << "\n";
+    std::cout << "j0: " << j0 << "\n";
+
     while (true)
     {
         r.resetBuffer(Pixel{0, 0, 0});
 
         // * DRAW TEST STUFF HERE
-        for (int y = 0; y < 16; ++y)
+        for (int y = 0; y < TILE_SIZE; ++y)
         {
-            for (int x = 16; x < 32; ++x)
+            for (int x = 0; x < TILE_SIZE; ++x)
             {
-                r.putPixel(x, y, pixels.at(y).at(x));
+                std::cout << x << " | " << y;
+                r.putPixel(x, y, pixels.at(j0 + y).at(i0 + x));
             }
+            std::cout << "\n";
         }
+
+        // return 0;
 
         // * DRAWING CODE GOES HERE --------------------------------------->
         // int camTileX = static_cast<int>(cam.x);
@@ -214,6 +233,8 @@ int main()
         // cam.x += 0.01;
 
         std::this_thread::sleep_for(std::chrono::milliseconds(DELAY)); // Control main loop delay
+
+        return 0;
     }
 
     // ! FREE TILES
