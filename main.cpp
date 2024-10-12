@@ -90,7 +90,7 @@ void keyListener(Camera &cam, Renderer &r)
     }
 }
 
-using Tile = Pixel **;
+using Tile = std::vector<std::vector<Pixel>>;
 
 int main()
 {
@@ -164,14 +164,25 @@ int main()
     //     tile[i].reserve(TILE_SIZE);
     // }
 
-    int n = 1;
+    int totalTileCount = (tilesetWidth / TILE_SIZE) * (tilesetHeight / TILE_SIZE);
 
-    int i0 = (TILE_SIZE * n) % tilesetWidth;
-    int j0 = ((TILE_SIZE * n) / tilesetWidth) * TILE_SIZE;
+    Tile t(TILE_SIZE);
 
-    std::cout << "n: " << n << "\n";
-    std::cout << "i0: " << i0 << "\n";
-    std::cout << "j0: " << j0 << "\n";
+    for (int n = 0; n < totalTileCount; ++n)
+    {
+        int i0 = (TILE_SIZE * n) % tilesetWidth;
+        int j0 = ((TILE_SIZE * n) / tilesetWidth) * TILE_SIZE;
+
+        for (int y = 0; y < TILE_SIZE; ++y)
+        {
+            for (int x = 0; x < TILE_SIZE; ++x)
+            {
+                t.at(y).push_back(pixels.at(j0 + y).at(i0 + x));
+            }
+        }
+
+        break;
+    }
 
     while (true)
     {
@@ -183,7 +194,7 @@ int main()
             for (int x = 0; x < TILE_SIZE; ++x)
             {
                 std::cout << x << " | " << y;
-                r.putPixel(x, y, pixels.at(j0 + y).at(i0 + x));
+                r.putPixel(x, y, t.at(y).at(x));
             }
             std::cout << "\n";
         }
