@@ -72,7 +72,7 @@ namespace Tilemaps
         45, 46, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 490, 491, 0, 0, 0, 294, 295, 601,
         85, 86, 641, 642, 641, 642, 641, 642, 641, 642, 641, 642, 641, 642, 641, 642, 641, 642, 641, 642, 641, 642, 641, 642, 641, 642, 641, 642, 641, 642, 641, 642, 641, 642, 641, 642, 641, 642, 641, 642};
 
-    int **OneD2TwoD(int *map, const int width, const int height, std::size_t size)
+    int **OneD2TwoD(int *map, const std::size_t width, const std::size_t height, std::size_t size)
     {
         if (size != width * height)
             throw(std::string("invalid map dimensions provided"));

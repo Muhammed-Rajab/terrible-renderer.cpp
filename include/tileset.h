@@ -10,28 +10,44 @@ class Tileset
 {
 
 public:
-    char *filename = nullptr;
     unsigned char *data = nullptr;
 
     int tilesetWidth = 0;
     int tilesetHeight = 0;
     int tilesetChannels = 0;
-    int TILE_SIZE;
+    int TILE_SIZE = 0;
 
-    Tileset(char *filename, int tile_size)
+    // TODO: IMPLEMENT A WAY TO LOAD THESE TILESET TO A PIXEL ARRAY
+    Pixel *tileset = nullptr;
+
+    Tileset(const char *filename, int tile_size)
     {
-        this->filename = filename;
         this->TILE_SIZE = tile_size;
         this->data = stbi_load(filename, &this->tilesetWidth, &this->tilesetHeight, &this->tilesetChannels, 4);
         if (this->data == nullptr)
-            throw std::string("can't load image");
+            throw std::runtime_error("can't load image in tileset constructor");
         // std::cout << "Tileset Width: " << this->tilesetWidth << "\n";
         // std::cout << "Tileset Height: " << this->tilesetHeight << "\n";
         // std::cout << "Tileset Channels: " << this->tilesetChannels << "\n";
+
+        // * INITIALIZE PIXEL ARRAY
+        // int width = this->tilesetWidth;
+        // int height = this->tilesetHeight;
+        // texture = new Pixel[this];
+    }
+
+    ~Tileset()
+    {
+        if (this->data != nullptr)
+        {
+            stbi_image_free(this->data);
+            this->data = nullptr;
+        }
     }
 
     void renderTile(int n, int x, int y, Renderer &r)
     {
+        // FIXME: TILE RENDERING LOGIC IS FAULTY
         int linearWidth = this->TILE_SIZE * n;
 
         // ((Tw * n) // w) * h

@@ -81,7 +81,7 @@ void Renderer::resetBuffer(Pixel p)
     }
 }
 
-inline void Renderer::putPixel(int x, int y, Pixel color)
+void Renderer::putPixel(int x, int y, Pixel color)
 {
     if (x >= 0 && x < this->width && y >= 0 && y < this->height)
     {
@@ -90,7 +90,7 @@ inline void Renderer::putPixel(int x, int y, Pixel color)
         // FIXME: ADD SUPPORT FOR SEMI TRANSPARENT BACKGROUND
         // this->buffer[y * this->width + x] = color;
 
-        Pixel temp = this->buffer[y * this->width + x];
+        // Pixel temp = this->buffer[y * this->width + x];
         if (color.a == 0)
         {
             return;

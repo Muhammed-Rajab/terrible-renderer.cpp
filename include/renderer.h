@@ -34,7 +34,7 @@ public:
     // ! BUFFER OPS
     void swapBuffers();
     void resetBuffer(Pixel p);
-    inline void putPixel(int x, int y, Pixel color);
+    void putPixel(int x, int y, Pixel color);
 
     // ! TERMINAL OPS
     void clearScreen();

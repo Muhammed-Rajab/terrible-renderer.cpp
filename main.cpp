@@ -21,6 +21,7 @@ GOALS:
 #include <chrono>
 #include <fcntl.h>
 #include <unistd.h>
+#include <vector>
 #include "include/hsl.h"
 #include "include/map.h"
 #include "include/character_map.h"
@@ -89,30 +90,25 @@ void keyListener(Camera &cam, Renderer &r)
     }
 }
 
+using Tile = Pixel **;
+
 int main()
 {
     // ! SEEDING
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
-    Renderer r{170, 128};
+    // Renderer r{170, 128};
+    Renderer r{64, 64};
 
     r.clearScreen();
     r.resetCursor();
-    // float DELAY_uS = (1 / 60.0f) * 1000000;
-    // int DELAY = 16;
-    int DELAY = 16;
+
+    // IN MILLISECONDS
+    int DELAY = 0;
 
     // ! READY THE SPRITES
-    int tilesetWidth = 0;
-    int tilesetHeight = 0;
-    int tilesetChannels = 0;
-
-    unsigned char *tileset = stbi_load("./assets/game/tileset.png", &tilesetWidth, &tilesetHeight, &tilesetChannels, 4);
-
-    if (tileset == nullptr)
-        throw(std::string("Failed to load tileset"));
-    int tileWidth = 16;
-    int tileHeight = 16;
+    // if (tileset == nullptr)
+    //     throw(std::string("Failed to load tileset"));
 
     Camera cam{0, 0, 0.4, 0.4};
 
@@ -121,44 +117,94 @@ int main()
     int **bgLayer = Tilemaps::OneD2TwoD(Tilemaps::backgroundLayer, Tilemaps::WIDTH, Tilemaps::HEIGHT, sizeof(Tilemaps::backgroundLayer) / sizeof(int));
     int **objLayer = Tilemaps::OneD2TwoD(Tilemaps::objectLayer, Tilemaps::WIDTH, Tilemaps::HEIGHT, sizeof(Tilemaps::objectLayer) / sizeof(int));
 
-    Tileset ts{"./assets/game/tileset.png", 16};
+    // int tileWidth = ts.TILE_SIZE;
+    // int tileHeight = ts.TILE_SIZE;
 
     float prevCamX = cam.x;
+
+    // TODO: IMPLEMENT A WAY TO GET SPRITE BY INDEX
+
+    Tileset ts{"./assets/game/tileset.png", 16};
+
+    int tilesetWidth = 0;
+    int tilesetHeight = 0;
+    int tilesetChannels = 0;
+    int TILE_SIZE = 16;
+
+    unsigned char *tileset = stbi_load("./assets/game/tileset.png", &tilesetWidth, &tilesetHeight, &tilesetChannels, 4);
+    std::cout << "Tileset Width: " << tilesetWidth << "\n";
+    std::cout << "Tileset Height: " << tilesetHeight << "\n";
+    std::cout << "Tileset Channels: " << tilesetChannels << "\n";
+
+    // ! PIXEL ARRAY OF TEXTURE
+    std::vector<std::vector<Pixel>> pixels(tilesetHeight);
+    for (int i = 0; i < tilesetHeight; ++i)
+    {
+        pixels[i].reserve(tilesetWidth);
+    }
+
+    for (int y = 0; y < tilesetHeight; ++y)
+    {
+        for (int x = 0; x < tilesetWidth; ++x)
+        {
+            int index = y * tilesetWidth * tilesetChannels + x * tilesetChannels;
+            Pixel p = {
+                tileset[index],
+                tileset[index + 1],
+                tileset[index + 2],
+                tileset[index + 3],
+            };
+            pixels.at(y).push_back(p);
+        }
+    }
 
     while (true)
     {
         r.resetBuffer(Pixel{0, 0, 0});
 
-        // * DRAWING CODE GOES HERE --------------------------------------->
-        int camTileX = static_cast<int>(cam.x);
-        int camTileY = static_cast<int>(cam.y);
-
-        float camOffsetX = cam.x - camTileX;
-        float camOffsetY = cam.y - camTileY;
-
-        int tilesAcross = (r.width / tileWidth) + 2;
-        int tilesDown = (r.height / tileHeight) + 2;
-
-        for (int y = 0; y < tilesDown; ++y)
+        // * DRAW TEST STUFF HERE
+        for (int y = 0; y < 16; ++y)
         {
-            for (int x = 0; x < tilesAcross; ++x)
+            for (int x = 16; x < 32; ++x)
             {
-                int tileX = (x * tileWidth) - static_cast<int>(camOffsetX * tileWidth);
-                int tileY = (y * tileHeight) - static_cast<int>(camOffsetY * tileHeight);
-
-                int mapX = camTileX + x;
-                int mapY = camTileY + y;
-
-                if (mapX >= 0 && mapX < Tilemaps::WIDTH && mapY >= 0 && mapY < Tilemaps::HEIGHT)
-                {
-                    int backgroundTile = bgLayer[mapY][mapX];
-                    int objectTile = objLayer[mapY][mapX];
-
-                    ts.renderTile(backgroundTile - 1, tileX, tileY, r);
-                    ts.renderTile(objectTile - 1, tileX, tileY, r);
-                }
+                r.putPixel(x, y, pixels.at(y).at(x));
             }
         }
+
+        // * DRAWING CODE GOES HERE --------------------------------------->
+        // int camTileX = static_cast<int>(cam.x);
+        // int camTileY = static_cast<int>(cam.y);
+
+        // float camOffsetX = cam.x - camTileX;
+        // float camOffsetY = cam.y - camTileY;
+
+        // int tilesAcross = (r.width / tileWidth) + 2;
+        // int tilesDown = (r.height / tileHeight) + 2;
+
+        // for (int y = 0; y < tilesDown; ++y)
+        // {
+        //     for (int x = 0; x < tilesAcross; ++x)
+        //     {
+        //         int tileX = (x * tileWidth) - static_cast<int>(camOffsetX * tileWidth);
+        //         int tileY = (y * tileHeight) - static_cast<int>(camOffsetY * tileHeight);
+
+        //         int mapX = camTileX + x;
+        //         int mapY = camTileY + y;
+
+        //         if (mapX >= 0 && mapX < Tilemaps::WIDTH && mapY >= 0 && mapY < Tilemaps::HEIGHT)
+        //         {
+        //             int backgroundTile = bgLayer[mapY][mapX];
+        //             int objectTile = objLayer[mapY][mapX];
+
+        //             // std::cout << "Before render" << "\n";
+
+        //             ts.renderTile(backgroundTile - 1, tileX, tileY, r);
+        //             ts.renderTile(objectTile - 1, tileX, tileY, r);
+
+        //             // std::cout << "After render" << "\n";
+        //         }
+        //     }
+        // }
 
         //*---------------------------------------------------------------->
         r.swapBuffers();
