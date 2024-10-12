@@ -81,7 +81,7 @@ void Renderer::resetBuffer(Pixel p)
     }
 }
 
-void Renderer::putPixel(int x, int y, Pixel color)
+void Renderer::putPixel(int x, int y, const Pixel &color)
 {
     if (x >= 0 && x < this->width && y >= 0 && y < this->height)
     {

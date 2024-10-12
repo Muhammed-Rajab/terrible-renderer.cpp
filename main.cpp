@@ -97,8 +97,8 @@ int main()
     // ! SEEDING
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
-    // Renderer r{170, 128};
-    Renderer r{64, 64};
+    Renderer r{170, 128};
+    // Renderer r{64, 64};
 
     r.clearScreen();
     r.resetCursor();
@@ -117,135 +117,57 @@ int main()
     int **bgLayer = Tilemaps::OneD2TwoD(Tilemaps::backgroundLayer, Tilemaps::WIDTH, Tilemaps::HEIGHT, sizeof(Tilemaps::backgroundLayer) / sizeof(int));
     int **objLayer = Tilemaps::OneD2TwoD(Tilemaps::objectLayer, Tilemaps::WIDTH, Tilemaps::HEIGHT, sizeof(Tilemaps::objectLayer) / sizeof(int));
 
-    // int tileWidth = ts.TILE_SIZE;
-    // int tileHeight = ts.TILE_SIZE;
-
-    float prevCamX = cam.x;
-
     // TODO: IMPLEMENT A WAY TO GET SPRITE BY INDEX
-
-    // Tileset ts{"./assets/game/tileset.png", 16};
-
-    int tilesetWidth = 0;
-    int tilesetHeight = 0;
-    int tilesetChannels = 0;
-    int TILE_SIZE = 16;
-
-    unsigned char *tileset = stbi_load("./assets/game/tileset.png", &tilesetWidth, &tilesetHeight, &tilesetChannels, 4);
-    std::cout << "Tileset Width: " << tilesetWidth << "\n";
-    std::cout << "Tileset Height: " << tilesetHeight << "\n";
-    std::cout << "Tileset Channels: " << tilesetChannels << "\n";
-
-    // ! PIXEL ARRAY OF TEXTURE
-    std::vector<std::vector<Pixel>> pixels(tilesetHeight);
-    for (int i = 0; i < tilesetHeight; ++i)
-    {
-        pixels[i].reserve(tilesetWidth);
-    }
-
-    for (int y = 0; y < tilesetHeight; ++y)
-    {
-        for (int x = 0; x < tilesetWidth; ++x)
-        {
-            int index = y * tilesetWidth * tilesetChannels + x * tilesetChannels;
-            Pixel p = {
-                tileset[index],
-                tileset[index + 1],
-                tileset[index + 2],
-                tileset[index + 3],
-            };
-            pixels.at(y).push_back(p);
-        }
-    }
-
-    // std::vector<std::vector<Pixel>> tile(TILE_SIZE);
-    // for (int i = 0; i < tilesetHeight; ++i)
-    // {
-    //     tile[i].reserve(TILE_SIZE);
-    // }
-
-    int totalTileCount = (tilesetWidth / TILE_SIZE) * (tilesetHeight / TILE_SIZE);
-
-    Tile t(TILE_SIZE);
-
-    for (int n = 0; n < totalTileCount; ++n)
-    {
-        int i0 = (TILE_SIZE * n) % tilesetWidth;
-        int j0 = ((TILE_SIZE * n) / tilesetWidth) * TILE_SIZE;
-
-        for (int y = 0; y < TILE_SIZE; ++y)
-        {
-            for (int x = 0; x < TILE_SIZE; ++x)
-            {
-                t.at(y).push_back(pixels.at(j0 + y).at(i0 + x));
-            }
-        }
-
-        break;
-    }
+    Tileset ts{"./assets/game/tileset.png", 16};
 
     while (true)
     {
         r.resetBuffer(Pixel{0, 0, 0});
 
         // * DRAW TEST STUFF HERE
-        for (int y = 0; y < TILE_SIZE; ++y)
-        {
-            for (int x = 0; x < TILE_SIZE; ++x)
-            {
-                std::cout << x << " | " << y;
-                r.putPixel(x, y, t.at(y).at(x));
-            }
-            std::cout << "\n";
-        }
-
-        // return 0;
 
         // * DRAWING CODE GOES HERE --------------------------------------->
-        // int camTileX = static_cast<int>(cam.x);
-        // int camTileY = static_cast<int>(cam.y);
+        int camTileX = static_cast<int>(cam.x);
+        int camTileY = static_cast<int>(cam.y);
 
-        // float camOffsetX = cam.x - camTileX;
-        // float camOffsetY = cam.y - camTileY;
+        float camOffsetX = cam.x - camTileX;
+        float camOffsetY = cam.y - camTileY;
 
-        // int tilesAcross = (r.width / tileWidth) + 2;
-        // int tilesDown = (r.height / tileHeight) + 2;
+        int tilesAcross = (r.width / ts.TILE_SIZE) + 2;
+        int tilesDown = (r.height / ts.TILE_SIZE) + 2;
 
-        // for (int y = 0; y < tilesDown; ++y)
-        // {
-        //     for (int x = 0; x < tilesAcross; ++x)
-        //     {
-        //         int tileX = (x * tileWidth) - static_cast<int>(camOffsetX * tileWidth);
-        //         int tileY = (y * tileHeight) - static_cast<int>(camOffsetY * tileHeight);
+        for (int y = 0; y < tilesDown; ++y)
+        {
+            for (int x = 0; x < tilesAcross; ++x)
+            {
+                int tileX = (x * ts.TILE_SIZE) - static_cast<int>(std::round(camOffsetX * ts.TILE_SIZE));
+                int tileY = (y * ts.TILE_SIZE) - static_cast<int>(std::round(camOffsetY * ts.TILE_SIZE));
 
-        //         int mapX = camTileX + x;
-        //         int mapY = camTileY + y;
+                int mapX = camTileX + x;
+                int mapY = camTileY + y;
 
-        //         if (mapX >= 0 && mapX < Tilemaps::WIDTH && mapY >= 0 && mapY < Tilemaps::HEIGHT)
-        //         {
-        //             int backgroundTile = bgLayer[mapY][mapX];
-        //             int objectTile = objLayer[mapY][mapX];
+                if (mapX >= 0 && mapX < Tilemaps::WIDTH && mapY >= 0 && mapY < Tilemaps::HEIGHT)
+                {
+                    int backgroundTile = bgLayer[mapY][mapX];
+                    int objectTile = objLayer[mapY][mapX];
 
-        //             // std::cout << "Before render" << "\n";
+                    // std::cout << "ot: " << objectTile - 1 << "\n";
+                    // std::cout << "bt: " << backgroundTile - 1 << "\n";
+                    // std::cout << "tile_x: " << tileX << "\n";
+                    // std::cout << "tile_y: " << tileY << "\n";
 
-        //             ts.renderTile(backgroundTile - 1, tileX, tileY, r);
-        //             ts.renderTile(objectTile - 1, tileX, tileY, r);
-
-        //             // std::cout << "After render" << "\n";
-        //         }
-        //     }
-        // }
+                    // ts.renderTile(backgroundTile - 1, tileX, tileY, r);
+                    ts.renderTile(objectTile, tileX, tileY, r);
+                }
+            }
+        }
 
         //*---------------------------------------------------------------->
         r.swapBuffers();
         r.resetCursor();
         r.render();
 
-        // cam.x += 0.01;
-
         std::this_thread::sleep_for(std::chrono::milliseconds(DELAY)); // Control main loop delay
-
-        return 0;
     }
 
     // ! FREE TILES
