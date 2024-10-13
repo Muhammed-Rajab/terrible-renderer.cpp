@@ -5,7 +5,7 @@
 #include <cstdint>
 
 // XXX: COMMENT THIS TO GET COLORFUL
-#define ASCII_RENDER_NO_COLOR 1
+// #define ASCII_RENDER_NO_COLOR 1
 
 // * REPRESENTS EVERY PIXEL OF OUR SCREEN
 struct Pixel

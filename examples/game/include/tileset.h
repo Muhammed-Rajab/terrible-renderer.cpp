@@ -2,6 +2,7 @@
 #define TILESET_4_TERMINAL_RENDERER_H
 
 #include <string>
+#include <vector>
 #include "renderer.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
