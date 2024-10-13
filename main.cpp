@@ -9,6 +9,7 @@ GOALS:
     2. Draw Images
         - Load an image to memory, and draw it to the buffer
 */
+
 #include <iostream>
 #include <sstream>
 #include <cstdint>
@@ -25,9 +26,10 @@ GOALS:
 #include "include/hsl.h"
 #include "include/map.h"
 #include "include/character_map.h"
-#include "include/renderer.h"
 #include "include/utils.h"
 #include "include/tileset.h"
+
+#include "include/renderer.h"
 
 struct Camera
 {

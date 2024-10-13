@@ -5,7 +5,7 @@ BUILD_DIR = build
 app: $(BUILD_DIR)/app
 
 $(BUILD_DIR)/app: $(BUILD_DIR)/main.o $(BUILD_DIR)/hsl.o $(BUILD_DIR)/renderer.o
-	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/app $(BUILD_DIR)/main.o $(BUILD_DIR)/hsl.o $(BUILD_DIR)/renderer.o 
+	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/app $(BUILD_DIR)/main.o $(BUILD_DIR)/hsl.o $(BUILD_DIR)/renderer.o
 
 $(BUILD_DIR)/main.o: main.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c main.cpp -o $(BUILD_DIR)/main.o
