@@ -92,8 +92,6 @@ void keyListener(Camera &cam, Renderer &r)
     }
 }
 
-using Tile = std::vector<std::vector<Pixel>>;
-
 int main()
 {
     // ! SEEDING
