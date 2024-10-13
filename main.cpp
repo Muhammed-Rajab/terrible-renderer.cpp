@@ -106,10 +106,6 @@ int main()
     // IN MILLISECONDS
     int DELAY = 0;
 
-    // ! READY THE SPRITES
-    // if (tileset == nullptr)
-    //     throw(std::string("Failed to load tileset"));
-
     Camera cam{0, 0, 0.4, 0.4};
 
     std::thread listener(keyListener, std::ref(cam), std::ref(r));
@@ -150,11 +146,6 @@ int main()
                 {
                     int backgroundTile = bgLayer[mapY][mapX];
                     int objectTile = objLayer[mapY][mapX];
-
-                    // std::cout << "ot: " << objectTile - 1 << "\n";
-                    // std::cout << "bt: " << backgroundTile - 1 << "\n";
-                    // std::cout << "tile_x: " << tileX << "\n";
-                    // std::cout << "tile_y: " << tileY << "\n";
 
                     if (backgroundTile != 0)
                     {
