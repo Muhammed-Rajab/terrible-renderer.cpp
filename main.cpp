@@ -116,6 +116,9 @@ int main()
     // TODO: IMPLEMENT A WAY TO GET SPRITE BY INDEX
     Tileset ts{"./assets/game/tileset.png", 16};
 
+    int tilesAcross = (r.width / ts.TILE_SIZE) + 2;
+    int tilesDown = (r.height / ts.TILE_SIZE) + 2;
+
     while (true)
     {
         r.resetBuffer(Pixel{0, 0, 0});
@@ -128,9 +131,6 @@ int main()
 
         float camOffsetX = cam.x - camTileX;
         float camOffsetY = cam.y - camTileY;
-
-        int tilesAcross = (r.width / ts.TILE_SIZE) + 2;
-        int tilesDown = (r.height / ts.TILE_SIZE) + 2;
 
         for (int y = 0; y < tilesDown; ++y)
         {
