@@ -225,6 +225,12 @@ float box(Vec3 p, Vec3 b)
     return q.max(0.0f).magnitude() + std::min(std::max(q.x, std::max(q.y, q.z)), 0.0f);
 }
 
+float torus(Vec3 p, Vec3 t)
+{
+    Vec3 q = Vec3{Vec3{p.x, p.z}.magnitude() - t.x, p.y};
+    return q.magnitude() - t.y;
+}
+
 //*------------------------------------------>
 //* COLORS
 //*------------------------------------------>
@@ -240,6 +246,7 @@ int main()
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
     Renderer r{96, 96};
+    // Renderer r{128, 128};
     // Renderer r{64, 64};
     // Renderer r{32, 32};
     // Renderer r{200, 96};
@@ -317,8 +324,6 @@ int main()
         std::this_thread::sleep_for(std::chrono::milliseconds(DELAY)); // Control main loop delay
 
         ++frameCount;
-
-        // return 0;
     }
 
     return EXIT_SUCCESS;
