@@ -40,7 +40,7 @@ Renderer::~Renderer()
 }
 
 // ! RENDERING
-void Renderer::render()
+std::string Renderer::render()
 {
     std::ostringstream oss;
     for (int y = 0; y < this->height; ++y)
@@ -71,7 +71,23 @@ void Renderer::render()
         }
         oss << "\n";
     }
+
+    // #if RENDER_ONLY
+    //     std::cout << oss.str();
+
+    // #elif CAPTURE_ONLY
+    //     // * SAVE TO FILE
+
+    // #elif RENDER_AND_CAPTURE
+    //     // * SAVE TO FILE
+    //     std::cout << oss.str();
+
+    // #else
+    //     throw std::string("mention whether to render, capture, or both.")
+    // #endif
+
     std::cout << oss.str();
+    return oss.str();
 }
 
 // ! BUFFER OPS

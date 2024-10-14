@@ -7,6 +7,10 @@
 // XXX: COMMENT THIS TO GET COLORFUL
 // #define ASCII_RENDER_NO_COLOR 1
 
+// #define CAPTURE_ONLY 0
+// #define RENDER_ONLY 1
+// #define RENDER_AND_CAPTURE 0
+
 // * REPRESENTS EVERY PIXEL OF OUR SCREEN
 struct Pixel
 {
@@ -32,7 +36,7 @@ public:
     ~Renderer();
 
     // ! RENDERING
-    void render();
+    std::string render();
 
     // ! BUFFER OPS
     void swapBuffers();

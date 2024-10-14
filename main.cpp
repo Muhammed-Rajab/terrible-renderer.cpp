@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <cstdint>
 #include <cstring>
 #include <cstdlib>
@@ -219,6 +220,11 @@ float sphere(Vec3 p, float r)
     return p.magnitude() - r;
 }
 
+// TODO: ADD A HEART SDF FOR AJITH
+float heart(Vec3 p)
+{
+}
+
 float box(Vec3 p, Vec3 b)
 {
     Vec3 q = p.abs().sub(b);
@@ -260,6 +266,10 @@ int main()
 
     std::size_t frameCount = 0;
 
+    const std::size_t TARGET_FPS = 60;
+    const float DURATION_IN_SECONDS = 3.0f;
+    const std::size_t MAX_FRAMES = std::round(30.0f * DURATION_IN_SECONDS);
+
     while (true)
     {
         r.resetBuffer(Pixel{0, 0, 0});
@@ -284,6 +294,7 @@ int main()
                 {
 
                     uv = uv.scale(1.61803399f).fract().sub({0.5f, 0.5f});
+                    // uv = uv.scale(4.0f).fract().sub({0.5f, 0.5f});
 
                     float d = sphere(uv, 0.5f);
                     // float d1 = sphere(uv.sub({0.5f}), 0.5f);
@@ -319,11 +330,18 @@ int main()
         //*---------------------------------------------------------------->
         r.swapBuffers();
         r.resetCursor();
-        r.render();
+
+        // * SAVE THE FRAME TO FILE
+        std::ofstream file(std::string("./captures/frame") + std::to_string(frameCount));
+        file << r.render();
+        file.close();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(DELAY)); // Control main loop delay
 
         ++frameCount;
+
+        if (frameCount == MAX_FRAMES)
+            break;
     }
 
     return EXIT_SUCCESS;
