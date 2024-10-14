@@ -231,12 +231,6 @@ float box(Vec3 p, Vec3 b)
     return q.max(0.0f).magnitude() + std::min(std::max(q.x, std::max(q.y, q.z)), 0.0f);
 }
 
-float torus(Vec3 p, Vec3 t)
-{
-    Vec3 q = Vec3{Vec3{p.x, p.z}.magnitude() - t.x, p.y};
-    return q.magnitude() - t.y;
-}
-
 //*------------------------------------------>
 //* COLORS
 //*------------------------------------------>
