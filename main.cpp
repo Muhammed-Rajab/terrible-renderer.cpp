@@ -67,6 +67,15 @@ struct Vec3
         };
     }
 
+    Vec3 sub(float val)
+    {
+        return {
+            this->x - val,
+            this->y - val,
+            this->z - val,
+        };
+    }
+
     Vec3 scale(float scalar)
     {
         return {
@@ -207,6 +216,22 @@ float step(float threshold, float val)
     }
 }
 
+int sign(float x)
+{
+    if (x < 0)
+    {
+        return -1;
+    }
+    else if (x > 0)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 float fract(float val)
 {
     return val - std::floor(val);
@@ -221,8 +246,29 @@ float sphere(Vec3 p, float r)
 }
 
 // TODO: ADD A HEART SDF FOR AJITH
-float heart(Vec3 p)
+float hexagram(Vec3 p, float r)
 {
+    // Define the constants from the GLSL version
+    Vec3 k1 = {-0.5f, 0.8660254038f, 0.0f}; // First 2D vector from vec4
+    Vec3 k2 = {0.8660254038f, -0.5f, 0.0f}; // Swapped components of the same vec4 for xy and yx
+
+    // Absolute value of p (mirror across x and y axes)
+    p = p.abs();
+
+    // First transformation
+    float dot1 = std::min(k1.dot(p), 0.0f);
+    p = p.sub(k1.scale(2.0f * dot1));
+
+    // Second transformation
+    float dot2 = std::min(k2.dot(p), 0.0f);
+    p = p.sub(k2.scale(2.0f * dot2));
+
+    // Clamp x coordinate and subtract r from y
+    float clampX = clamp(r * 0.5773502692f, r * 1.7320508076f, p.x); // r * k.z and r * k.w
+    p = {p.x - clampX, p.y - r, 0.0f};
+
+    // Return the distance, with sign based on y coordinate
+    return p.magnitude() * sign(p.y);
 }
 
 float box(Vec3 p, Vec3 b)
@@ -240,22 +286,13 @@ Vec3 color(float t, Vec3 a, Vec3 b, Vec3 c, Vec3 d)
     return a.add(b.scale(c.scale(t).add(d).scale(2 * M_PI).cos()));
 }
 
-int main()
+void shaderKishmishuExample1()
 {
-    // ! SEEDING
-    std::srand(static_cast<unsigned int>(std::time(nullptr)));
-
     Renderer r{96, 96};
-    // Renderer r{128, 128};
-    // Renderer r{64, 64};
-    // Renderer r{32, 32};
-    // Renderer r{200, 96};
-    // Renderer r{220, 220};
 
     r.clearScreen();
     r.resetCursor();
 
-    // IN MILLISECONDS
     int DELAY = 16;
 
     std::size_t frameCount = 0;
@@ -324,19 +361,86 @@ int main()
         //*---------------------------------------------------------------->
         r.swapBuffers();
         r.resetCursor();
+        r.render();
 
         // * SAVE THE FRAME TO FILE
-        std::ofstream file(std::string("./captures/") + std::to_string(frameCount));
-        file << r.render();
-        file.close();
+        // std::ofstream file(std::string("./captures/") + std::to_string(frameCount));
+        // file << r.render();
+        // file.close();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(DELAY)); // Control main loop delay
 
         ++frameCount;
 
-        if (frameCount == MAX_FRAMES)
-            break;
+        // if (frameCount == MAX_FRAMES)
+        //     break;
     }
+}
+
+void shaderHeartExample()
+{
+    Renderer r{96, 96};
+
+    r.clearScreen();
+    r.resetCursor();
+
+    int DELAY = 16;
+
+    std::size_t frameCount = 0;
+
+    const std::size_t TARGET_FPS = 60;
+    const float DURATION_IN_SECONDS = 15.0f;
+    const std::size_t MAX_FRAMES = std::round(TARGET_FPS * DURATION_IN_SECONDS);
+
+    while (true)
+    {
+        r.resetBuffer(Pixel{0, 0, 0});
+
+        // * DRAW TEST STUFF HERE
+
+        // * DRAWING CODE GOES HERE --------------------------------------->
+        for (int y = 0; y < r.height; ++y)
+        {
+            for (int x = 0; x < r.width; ++x)
+            {
+                NormalColor fragColor;
+                // ! FLIP THE Y-AXIS
+                Vec3 uv = getUV(x, r.height - y - 1, r);
+                uv = uv.sub({0.5f, 0.5f, 0.0f}).scale(2.0f);
+                uv.x *= r.width / r.height;
+
+                fragColor = uv.toNormalColor(1.0f);
+                //*--------------------------------------->
+                r.putPixel(x, y, normalColorToPixel(fragColor.r, fragColor.g, fragColor.b, fragColor.a));
+            }
+        }
+
+        //*---------------------------------------------------------------->
+        r.swapBuffers();
+        r.resetCursor();
+        r.render();
+
+        // * SAVE THE FRAME TO FILE
+        // std::ofstream file(std::string("./captures/") + std::to_string(frameCount));
+        // file << r.render();
+        // file.close();
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(DELAY)); // Control main loop delay
+
+        ++frameCount;
+
+        // if (frameCount == MAX_FRAMES)
+        //     break;
+    }
+}
+
+int main()
+{
+    // ! SEEDING
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
+    // shaderKishmishuExample1();
+    shaderHeartExample();
 
     return EXIT_SUCCESS;
 }

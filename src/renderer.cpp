@@ -68,7 +68,7 @@ std::string Renderer::render()
         oss << "\n";
     }
 
-    // std::cout << oss.str();
+    std::cout << oss.str();
     return oss.str();
 }
 
