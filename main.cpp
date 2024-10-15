@@ -286,8 +286,11 @@ Vec3 color(float t, Vec3 a, Vec3 b, Vec3 c, Vec3 d)
     return a.add(b.scale(c.scale(t).add(d).scale(2 * M_PI).cos()));
 }
 
-void shaderKishmishuExample1()
+int main()
 {
+    // ! SEEDING
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
     Renderer r{96, 96};
 
     r.clearScreen();
@@ -297,106 +300,9 @@ void shaderKishmishuExample1()
 
     std::size_t frameCount = 0;
 
-    const std::size_t TARGET_FPS = 60;
-    const float DURATION_IN_SECONDS = 15.0f;
-    const std::size_t MAX_FRAMES = std::round(TARGET_FPS * DURATION_IN_SECONDS);
-
     while (true)
     {
         r.resetBuffer(Pixel{0, 0, 0});
-
-        // * DRAW TEST STUFF HERE
-
-        // * DRAWING CODE GOES HERE --------------------------------------->
-        for (int y = 0; y < r.height; ++y)
-        {
-            for (int x = 0; x < r.width; ++x)
-            {
-                NormalColor fragColor;
-                // ! FLIP THE Y-AXIS
-                Vec3 uv = getUV(x, r.height - y - 1, r);
-                uv = uv.sub({0.5f, 0.5f, 0.0f}).scale(2.0f);
-                uv.x *= r.width / r.height;
-
-                Vec3 uv0 = uv.copy();
-
-                Vec3 fColor{0.0f};
-                for (int i = 0; i < 3; ++i)
-                {
-
-                    uv = uv.scale(1.61803399f).fract().sub({0.5f, 0.5f});
-                    // uv = uv.scale(4.0f).fract().sub({0.5f, 0.5f});
-
-                    float d = sphere(uv, 0.5f);
-                    // float d1 = sphere(uv.sub({0.5f}), 0.5f);
-                    // float d2 = box(uv.sub({-0.25f}), {0.5f, 0.5f, 0.5f});
-
-                    // float d = std::min(d1, d2);
-
-                    Vec3 col = color(uv0.magnitude() + frameCount * 0.001f + i * 0.1,
-                                     {0.5f, 0.5f, 0.5f},
-                                     {0.5f, 0.5f, 0.5f},
-                                     {1.0f, 1.0f, 1.0f},
-                                     {0.00f, 0.10f, 0.20f});
-
-                    // Vec3 col{1.0f, 0.5f, 2.0f};
-                    d = std::sin(d * 8.0f + frameCount * 0.05f) / 8.0f;
-                    d = std::fabs(d);
-
-                    d = 0.009f / d;
-                    d = std::pow(d, 1.2f);
-                    // d = 0.01f / d;
-
-                    fColor = fColor.add(col.scale(d));
-                    // col = col.scale(d);
-                }
-
-                fragColor = fColor.toNormalColor(1.0f);
-                // fragColor = uv.toNormalColor(1.0f);
-                //*--------------------------------------->
-                r.putPixel(x, y, normalColorToPixel(fragColor.r, fragColor.g, fragColor.b, fragColor.a));
-            }
-        }
-
-        //*---------------------------------------------------------------->
-        r.swapBuffers();
-        r.resetCursor();
-        r.render();
-
-        // * SAVE THE FRAME TO FILE
-        // std::ofstream file(std::string("./captures/") + std::to_string(frameCount));
-        // file << r.render();
-        // file.close();
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(DELAY)); // Control main loop delay
-
-        ++frameCount;
-
-        // if (frameCount == MAX_FRAMES)
-        //     break;
-    }
-}
-
-void shaderHeartExample()
-{
-    Renderer r{96, 96};
-
-    r.clearScreen();
-    r.resetCursor();
-
-    int DELAY = 16;
-
-    std::size_t frameCount = 0;
-
-    const std::size_t TARGET_FPS = 60;
-    const float DURATION_IN_SECONDS = 15.0f;
-    const std::size_t MAX_FRAMES = std::round(TARGET_FPS * DURATION_IN_SECONDS);
-
-    while (true)
-    {
-        r.resetBuffer(Pixel{0, 0, 0});
-
-        // * DRAW TEST STUFF HERE
 
         // * DRAWING CODE GOES HERE --------------------------------------->
         for (int y = 0; y < r.height; ++y)
@@ -428,19 +334,7 @@ void shaderHeartExample()
         std::this_thread::sleep_for(std::chrono::milliseconds(DELAY)); // Control main loop delay
 
         ++frameCount;
-
-        // if (frameCount == MAX_FRAMES)
-        //     break;
     }
-}
-
-int main()
-{
-    // ! SEEDING
-    std::srand(static_cast<unsigned int>(std::time(nullptr)));
-
-    // shaderKishmishuExample1();
-    shaderHeartExample();
 
     return EXIT_SUCCESS;
 }
