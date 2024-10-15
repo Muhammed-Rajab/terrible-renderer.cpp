@@ -274,26 +274,6 @@ float sdBox(Vec3 p, Vec3 b)
     return q.max(0.0f).magnitude() + std::min(std::max(q.x, std::max(q.y, q.z)), 0.0f);
 }
 
-float sdTorus(Vec3 p, Vec3 t)
-{
-    Vec3 temp = p.copy();
-    temp.y = 0;
-    Vec3 q = {temp.magnitude() - t.x, p.y, 0.0f};
-    return q.magnitude() - t.y;
-}
-
-float sdBoxFrame(Vec3 p, Vec3 b, float e)
-{
-    Vec3 absP = p.abs().sub(b);
-    Vec3 q = absP.add(e).sub(e);
-
-    float length1 = std::sqrt(std::max(absP.x, 0.0f)) + std::min(std::max(absP.x, std::max(q.y, q.z)), 0.0f);
-    float length2 = std::sqrt(std::max(q.x, 0.0f)) + std::min(std::max(q.x, std::max(absP.y, q.z)), 0.0f);
-    float length3 = std::sqrt(std::max(q.x, 0.0f)) + std::min(std::max(q.x, std::max(q.y, absP.z)), 0.0f);
-
-    return std::min(std::min(length1, length2), length3);
-}
-
 float map(Vec3 p, std::size_t frameCount)
 {
     Vec3 spherePos = Vec3{3.0f * std::sin(frameCount * 0.05f), 0.0f, 0.0f};
