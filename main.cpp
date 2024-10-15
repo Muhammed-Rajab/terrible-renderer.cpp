@@ -237,44 +237,9 @@ float fract(float val)
     return val - std::floor(val);
 }
 
-//*------------------------------------------->
-//* SDFs
-//*------------------------------------------->
-float sphere(Vec3 p, float r)
+float smin(float a, float b, float k)
 {
-    return p.magnitude() - r;
-}
-
-// TODO: ADD A HEART SDF FOR AJITH
-float hexagram(Vec3 p, float r)
-{
-    // Define the constants from the GLSL version
-    Vec3 k1 = {-0.5f, 0.8660254038f, 0.0f}; // First 2D vector from vec4
-    Vec3 k2 = {0.8660254038f, -0.5f, 0.0f}; // Swapped components of the same vec4 for xy and yx
-
-    // Absolute value of p (mirror across x and y axes)
-    p = p.abs();
-
-    // First transformation
-    float dot1 = std::min(k1.dot(p), 0.0f);
-    p = p.sub(k1.scale(2.0f * dot1));
-
-    // Second transformation
-    float dot2 = std::min(k2.dot(p), 0.0f);
-    p = p.sub(k2.scale(2.0f * dot2));
-
-    // Clamp x coordinate and subtract r from y
-    float clampX = clamp(r * 0.5773502692f, r * 1.7320508076f, p.x); // r * k.z and r * k.w
-    p = {p.x - clampX, p.y - r, 0.0f};
-
-    // Return the distance, with sign based on y coordinate
-    return p.magnitude() * sign(p.y);
-}
-
-float box(Vec3 p, Vec3 b)
-{
-    Vec3 q = p.abs().sub(b);
-    return q.max(0.0f).magnitude() + std::min(std::max(q.x, std::max(q.y, q.z)), 0.0f);
+    return (a + b - std::sqrt(std::pow(a - b, 2.0f) + k * k)) * 0.5f;
 }
 
 //*------------------------------------------>
@@ -286,12 +251,40 @@ Vec3 color(float t, Vec3 a, Vec3 b, Vec3 c, Vec3 d)
     return a.add(b.scale(c.scale(t).add(d).scale(2 * M_PI).cos()));
 }
 
+//*------------------------------------------->
+//* SDFs
+//*------------------------------------------->
+float sdSphere(Vec3 p, float r)
+{
+    return p.magnitude() - r;
+}
+
+float sdBox(Vec3 p, Vec3 b)
+{
+    Vec3 q = p.abs().sub(b);
+    return q.max(0.0f).magnitude() + std::min(std::max(q.x, std::max(q.y, q.z)), 0.0f);
+}
+
+float map(Vec3 p, std::size_t frameCount)
+{
+    Vec3 spherePos = Vec3{3.0f * std::sin(frameCount * 0.05f), 0.0f, 0.0f};
+    float sphere = sdSphere(p.sub(spherePos), 1.4f);
+
+    float box = sdBox(p, Vec3{0.75f, 0.75f, 0.75f});
+
+    float ground = p.y + 0.75f;
+
+    return smin(ground, smin(box, sphere, 0.75f), .5f);
+}
+
 int main()
 {
     // ! SEEDING
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
     Renderer r{96, 96};
+    // Renderer r{128, 128};
+    // Renderer r{64, 64};
 
     r.clearScreen();
     r.resetCursor();
@@ -314,9 +307,38 @@ int main()
                 Vec3 uv = getUV(x, r.height - y - 1, r);
                 uv = uv.sub({0.5f, 0.5f, 0.0f}).scale(2.0f);
                 uv.x *= r.width / r.height;
+                //?->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-                fragColor = uv.toNormalColor(1.0f);
-                //*--------------------------------------->
+                //  * INITIALIZATION
+                Vec3 ro = {0, 0, -3};
+                Vec3 rd = {uv.x, uv.y, 1};
+                rd.normalize();
+
+                Vec3 col{1.0f, 1.0f, 1.0f};
+
+                // Ray matching
+                float t = 0.0f;
+
+                for (int i = 0; i < 80; ++i)
+                {
+
+                    Vec3 p = ro.add(rd.scale(t));
+
+                    float d = map(p, frameCount);
+
+                    t += d;
+
+                    // col = Vec3{1.0f, 1.0f, 1.0f}.scale(i / 80.0f);
+
+                    if (d < 0.001 || t > 100.0f)
+                        break;
+                }
+
+                col = col.scale(t * 0.1f);
+
+                fragColor = col.toNormalColor(1.0f);
+                // fragColor = uv.toNormalColor(1.0f);
+                //?->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                 r.putPixel(x, y, normalColorToPixel(fragColor.r, fragColor.g, fragColor.b, fragColor.a));
             }
         }
