@@ -58,6 +58,15 @@ struct Vec3
         };
     }
 
+    Vec3 add(float val)
+    {
+        return {
+            this->x + val,
+            this->y + val,
+            this->z + val,
+        };
+    }
+
     Vec3 sub(Vec3 b)
     {
         return {
@@ -265,16 +274,37 @@ float sdBox(Vec3 p, Vec3 b)
     return q.max(0.0f).magnitude() + std::min(std::max(q.x, std::max(q.y, q.z)), 0.0f);
 }
 
+float sdTorus(Vec3 p, Vec3 t)
+{
+    Vec3 temp = p.copy();
+    temp.y = 0;
+    Vec3 q = {temp.magnitude() - t.x, p.y, 0.0f};
+    return q.magnitude() - t.y;
+}
+
+float sdBoxFrame(Vec3 p, Vec3 b, float e)
+{
+    Vec3 absP = p.abs().sub(b);
+    Vec3 q = absP.add(e).sub(e);
+
+    float length1 = std::sqrt(std::max(absP.x, 0.0f)) + std::min(std::max(absP.x, std::max(q.y, q.z)), 0.0f);
+    float length2 = std::sqrt(std::max(q.x, 0.0f)) + std::min(std::max(q.x, std::max(absP.y, q.z)), 0.0f);
+    float length3 = std::sqrt(std::max(q.x, 0.0f)) + std::min(std::max(q.x, std::max(q.y, absP.z)), 0.0f);
+
+    return std::min(std::min(length1, length2), length3);
+}
+
 float map(Vec3 p, std::size_t frameCount)
 {
     Vec3 spherePos = Vec3{3.0f * std::sin(frameCount * 0.05f), 0.0f, 0.0f};
-    float sphere = sdSphere(p.sub(spherePos), 1.4f);
+    float sphere = sdSphere(p.sub(spherePos), .9f);
 
     float box = sdBox(p, Vec3{0.75f, 0.75f, 0.75f});
 
     float ground = p.y + 0.75f;
 
-    return smin(ground, smin(box, sphere, 0.75f), .5f);
+    return std::min(ground, smin(box, sphere, 0.75f));
+    // return std::min(ground, std::max(box, -sphere));
 }
 
 int main()
@@ -283,6 +313,7 @@ int main()
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
     Renderer r{96, 96};
+    // Renderer r{220, 220};
     // Renderer r{128, 128};
     // Renderer r{64, 64};
 
@@ -314,7 +345,7 @@ int main()
                 Vec3 rd = {uv.x, uv.y, 1};
                 rd.normalize();
 
-                Vec3 col{1.0f, 1.0f, 1.0f};
+                // Vec3 col{1.0f, 1.0f, 1.0f};
 
                 // Ray matching
                 float t = 0.0f;
@@ -334,7 +365,28 @@ int main()
                         break;
                 }
 
-                col = col.scale(t * 0.1f);
+                Vec3 col{0.1f, 0.1f, 0.1f};
+                if (t > 5.0f)
+                {
+                    col = Vec3{0.1f, 0.1f, 0.1f};
+                }
+                else
+                {
+                    // col = Vec3{1.0f, 1.0f, 1.0f}.scale(t * 0.1f);
+                    col = color(t,
+                                {0.5f, 0.5f, 0.5f},
+                                {0.5f, 0.5f, 0.5f},
+                                {1.0f, 1.0f, 1.0f},
+                                {0.00f, 0.10f, 0.20f});
+
+                    // col = color(t,
+                    //             {0.5f, 0.5f, 0.5f},
+                    //             {0.5f, 0.5f, 0.5f},
+                    //             {1.0f, 1.0f, 1.0f},
+                    //             {0.00f, 0.10f, 0.20f});
+                }
+
+                // col = col.scale(t * 0.1f);
 
                 fragColor = col.toNormalColor(1.0f);
                 // fragColor = uv.toNormalColor(1.0f);
