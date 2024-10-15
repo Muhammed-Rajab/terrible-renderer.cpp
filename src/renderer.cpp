@@ -56,37 +56,19 @@ std::string Renderer::render()
             p.b = std::max(0, std::min(255, (int)p.b));
             p.a = std::max(0, std::min(255, (int)p.a));
 
-#ifdef ASCII_RENDER_NO_COLOR
-
-            int brightness = static_cast<int>((0.299f * p.r + 0.587 * p.g + 0.114f * p.b));
-            char pixel = CHARACTER_MAP[brightness];
-
-            oss << pixel << pixel;
-#else
-
             oss << "\033[38;2;" << (unsigned int)p.r << ";" << (unsigned int)p.g << ";" << (unsigned int)p.b << "m" << "██";
-#endif
+
+            // int brightness = static_cast<int>((0.299f * p.r + 0.587 * p.g + 0.114f * p.b));
+            // char pixel = CHARACTER_MAP[brightness];
+
+            // oss << pixel << pixel;
 
             // oss << "\033[38;2;" << (unsigned int)p.r << ";" << (unsigned int)p.g << ";" << (unsigned int)p.b << "m" << pixel << pixel;
         }
         oss << "\n";
     }
 
-    // #if RENDER_ONLY
-    //     std::cout << oss.str();
-
-    // #elif CAPTURE_ONLY
-    //     // * SAVE TO FILE
-
-    // #elif RENDER_AND_CAPTURE
-    //     // * SAVE TO FILE
-    //     std::cout << oss.str();
-
-    // #else
-    //     throw std::string("mention whether to render, capture, or both.")
-    // #endif
-
-    std::cout << oss.str();
+    // std::cout << oss.str();
     return oss.str();
 }
 

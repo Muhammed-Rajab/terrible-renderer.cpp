@@ -261,8 +261,8 @@ int main()
     std::size_t frameCount = 0;
 
     const std::size_t TARGET_FPS = 60;
-    const float DURATION_IN_SECONDS = 3.0f;
-    const std::size_t MAX_FRAMES = std::round(30.0f * DURATION_IN_SECONDS);
+    const float DURATION_IN_SECONDS = 15.0f;
+    const std::size_t MAX_FRAMES = std::round(TARGET_FPS * DURATION_IN_SECONDS);
 
     while (true)
     {
@@ -326,7 +326,7 @@ int main()
         r.resetCursor();
 
         // * SAVE THE FRAME TO FILE
-        std::ofstream file(std::string("./captures/frame") + std::to_string(frameCount));
+        std::ofstream file(std::string("./captures/") + std::to_string(frameCount));
         file << r.render();
         file.close();
 
