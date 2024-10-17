@@ -63,8 +63,7 @@ void Renderer::render()
 #elif ASCII_RENDER_WITH_COLOR
             int brightness = static_cast<int>((0.299f * p.r + 0.587 * p.g + 0.114f * p.b));
             char pixel = CHARACTER_MAP[brightness];
-            oss << pixel << pixel;
-            oss << "\033[38;2;" << (unsigned int)p.r << ";" << (unsigned int)p.g << ";" << (unsigned int)p.b << "m" << pixel;
+            oss << "\033[38;2;" << (unsigned int)p.r << ";" << (unsigned int)p.g << ";" << (unsigned int)p.b << "m" << pixel << pixel;
 #else
             oss << "\033[38;2;" << (unsigned int)p.r << ";" << (unsigned int)p.g << ";" << (unsigned int)p.b << "m" << "██";
 

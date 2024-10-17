@@ -277,7 +277,7 @@ float sdBox(Vec3 p, Vec3 b)
 float map(Vec3 p, std::size_t frameCount)
 {
     Vec3 spherePos = Vec3{3.0f * std::sin(frameCount * 0.05f), 0.0f, 0.0f};
-    float sphere = sdSphere(p.sub(spherePos), .9f);
+    float sphere = sdSphere(p.sub(spherePos), 1.2f);
 
     Vec3 boxPos = Vec3{0.0f, 0.0f, 0.0f};
     float box = sdBox(p.sub(boxPos), Vec3{0.75f, 0.75f, 0.75f});
