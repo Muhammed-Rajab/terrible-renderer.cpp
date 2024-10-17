@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS = -Iinclude -Wall -std=c++17 
+CXXFLAGS = -Iinclude -Wall -std=c++17 -O4
 BUILD_DIR = build
 
 app: $(BUILD_DIR)/app

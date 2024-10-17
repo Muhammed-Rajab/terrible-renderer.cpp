@@ -279,11 +279,13 @@ float map(Vec3 p, std::size_t frameCount)
     Vec3 spherePos = Vec3{3.0f * std::sin(frameCount * 0.05f), 0.0f, 0.0f};
     float sphere = sdSphere(p.sub(spherePos), .9f);
 
-    float box = sdBox(p, Vec3{0.75f, 0.75f, 0.75f});
+    Vec3 boxPos = Vec3{0.0f, 0.0f, 0.0f};
+    float box = sdBox(p.sub(boxPos), Vec3{0.75f, 0.75f, 0.75f});
 
     float ground = p.y + 0.75f;
 
-    return std::min(ground, smin(box, sphere, 0.75f));
+    // return std::min(ground, smin(box, sphere, 0.75f));
+    return smin(ground, smin(box, sphere, 0.75f), .1f);
     // return std::min(ground, std::max(box, -sphere));
 }
 
@@ -292,9 +294,9 @@ int main()
     // ! SEEDING
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
-    Renderer r{96, 96};
+    // Renderer r{96, 96};
     // Renderer r{220, 220};
-    // Renderer r{128, 128};
+    Renderer r{128, 128};
     // Renderer r{64, 64};
 
     r.clearScreen();
@@ -369,6 +371,7 @@ int main()
                 // col = col.scale(t * 0.1f);
 
                 fragColor = col.toNormalColor(1.0f);
+                // fragColor = Vec3{1.0f, 1.0f, 1.0f}.scale((1.0f / t)).toNormalColor(1.0f);
                 // fragColor = uv.toNormalColor(1.0f);
                 //?->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                 r.putPixel(x, y, normalColorToPixel(fragColor.r, fragColor.g, fragColor.b, fragColor.a));
