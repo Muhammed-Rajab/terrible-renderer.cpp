@@ -108,25 +108,6 @@ void Renderer::putPixel(int x, int y, const Pixel &color)
             this->buffer[y * this->width + x] = color;
             return;
         }
-
-        // FIXME: SHUTTING ALPHA BLENDING FOR NOW, DUE TO EXCESS FLOATING POINT ARITHEMETIC
-        return;
-        if (color.a > 0 && color.a < 255)
-        {
-            // TODO: ! BLEND THIS BITCH
-            Pixel &dst = this->buffer[y * this->width + x];
-
-            float sA = color.a / 255.0f;
-            float dA = dst.a / 255.0f;
-
-            uint8_t dr = color.r * sA + (dst.r * (1 - sA));
-            uint8_t dg = color.g * sA + (dst.g * (1 - sA));
-            uint8_t db = color.b * sA + (dst.b * (1 - sA));
-
-            uint8_t outAlpha = (sA + dA * (1 - sA)) * 255;
-
-            this->buffer[y * this->width + x] = {dr, dg, db, outAlpha};
-        }
     }
 }
 
