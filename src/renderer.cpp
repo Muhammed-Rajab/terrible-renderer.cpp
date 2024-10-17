@@ -40,7 +40,7 @@ Renderer::~Renderer()
 }
 
 // ! RENDERING
-std::string Renderer::render()
+void Renderer::render()
 {
     std::ostringstream oss;
     for (int y = 0; y < this->height; ++y)
@@ -56,20 +56,24 @@ std::string Renderer::render()
             p.b = std::max(0, std::min(255, (int)p.b));
             p.a = std::max(0, std::min(255, (int)p.a));
 
+#if ASCII_RENDER_NO_COLOR
+            int brightness = static_cast<int>((0.299f * p.r + 0.587 * p.g + 0.114f * p.b));
+            char pixel = CHARACTER_MAP[brightness];
+            oss << pixel << pixel;
+#elif ASCII_RENDER_WITH_COLOR
+            int brightness = static_cast<int>((0.299f * p.r + 0.587 * p.g + 0.114f * p.b));
+            char pixel = CHARACTER_MAP[brightness];
+            oss << pixel << pixel;
+            oss << "\033[38;2;" << (unsigned int)p.r << ";" << (unsigned int)p.g << ";" << (unsigned int)p.b << "m" << pixel;
+#else
             oss << "\033[38;2;" << (unsigned int)p.r << ";" << (unsigned int)p.g << ";" << (unsigned int)p.b << "m" << "██";
 
-            // int brightness = static_cast<int>((0.299f * p.r + 0.587 * p.g + 0.114f * p.b));
-            // char pixel = CHARACTER_MAP[brightness];
-
-            // oss << pixel << pixel;
-
-            // oss << "\033[38;2;" << (unsigned int)p.r << ";" << (unsigned int)p.g << ";" << (unsigned int)p.b << "m" << pixel << pixel;
+#endif
         }
         oss << "\n";
     }
 
     std::cout << oss.str();
-    return oss.str();
 }
 
 // ! BUFFER OPS

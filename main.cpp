@@ -296,8 +296,8 @@ int main()
 
     // Renderer r{96, 96};
     // Renderer r{220, 220};
-    Renderer r{128, 128};
-    // Renderer r{64, 64};
+    // Renderer r{128, 128};
+    Renderer r{64, 64};
 
     r.clearScreen();
     r.resetCursor();
