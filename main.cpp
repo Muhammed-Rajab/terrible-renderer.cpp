@@ -284,9 +284,7 @@ float map(Vec3 p, std::size_t frameCount)
 
     float ground = p.y + 0.75f;
 
-    // return std::min(ground, smin(box, sphere, 0.75f));
     return smin(ground, smin(box, sphere, 0.75f), .1f);
-    // return std::min(ground, std::max(box, -sphere));
 }
 
 int main()
@@ -327,8 +325,6 @@ int main()
                 Vec3 rd = {uv.x, uv.y, 1};
                 rd.normalize();
 
-                // Vec3 col{1.0f, 1.0f, 1.0f};
-
                 // Ray matching
                 float t = 0.0f;
 
@@ -341,8 +337,6 @@ int main()
 
                     t += d;
 
-                    // col = Vec3{1.0f, 1.0f, 1.0f}.scale(i / 80.0f);
-
                     if (d < 0.001 || t > 100.0f)
                         break;
                 }
@@ -354,25 +348,14 @@ int main()
                 }
                 else
                 {
-                    // col = Vec3{1.0f, 1.0f, 1.0f}.scale(t * 0.1f);
                     col = color(t,
                                 {0.5f, 0.5f, 0.5f},
                                 {0.5f, 0.5f, 0.5f},
                                 {1.0f, 1.0f, 1.0f},
                                 {0.00f, 0.10f, 0.20f});
-
-                    // col = color(t,
-                    //             {0.5f, 0.5f, 0.5f},
-                    //             {0.5f, 0.5f, 0.5f},
-                    //             {1.0f, 1.0f, 1.0f},
-                    //             {0.00f, 0.10f, 0.20f});
                 }
 
-                // col = col.scale(t * 0.1f);
-
                 fragColor = col.toNormalColor(1.0f);
-                // fragColor = Vec3{1.0f, 1.0f, 1.0f}.scale((1.0f / t)).toNormalColor(1.0f);
-                // fragColor = uv.toNormalColor(1.0f);
                 //?->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                 r.putPixel(x, y, normalColorToPixel(fragColor.r, fragColor.g, fragColor.b, fragColor.a));
             }
@@ -382,11 +365,6 @@ int main()
         r.swapBuffers();
         r.resetCursor();
         r.render();
-
-        // * SAVE THE FRAME TO FILE
-        // std::ofstream file(std::string("./captures/") + std::to_string(frameCount));
-        // file << r.render();
-        // file.close();
 
         std::this_thread::sleep_for(std::chrono::milliseconds(DELAY)); // Control main loop delay
 
