@@ -3,6 +3,7 @@
 
 couldn't bother myself finding a better name
 
+> It is recommended to go through `src/renderer.cpp` and `include/renderer.h` before building the examples, as there are parameters you can set to render the examples according to your style.
 
 ## Table of Contents
 
