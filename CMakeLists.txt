@@ -10,3 +10,12 @@ add_subdirectory(examples/raymarching)
 add_subdirectory(examples/shader)
 add_subdirectory(examples/sphere)
 add_subdirectory(examples/game)
+
+add_executable(app main.cpp)
+
+target_compile_options(app PRIVATE -Wall -O3)
+
+target_include_directories(app PRIVATE ${CMAKE_SOURCE_DIR}/include)
+
+target_sources(app PRIVATE ${CMAKE_SOURCE_DIR}/src/renderer.cpp)
+
