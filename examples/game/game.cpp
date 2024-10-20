@@ -90,7 +90,8 @@ int main()
     int **objLayer = Tilemaps::OneD2TwoD(Tilemaps::objectLayer, Tilemaps::WIDTH, Tilemaps::HEIGHT, sizeof(Tilemaps::objectLayer) / sizeof(int));
 
     // TODO: IMPLEMENT A WAY TO GET SPRITE BY INDEX
-    Tileset ts{"./assets/game/tileset.png", 16};
+    // Tileset ts{"./assets/game/tileset.png", 16};
+    Tileset ts{"../../../assets/game/tileset.png", 16};
 
     int tilesAcross = (r.width / ts.TILE_SIZE) + 2;
     int tilesDown = (r.height / ts.TILE_SIZE) + 2;

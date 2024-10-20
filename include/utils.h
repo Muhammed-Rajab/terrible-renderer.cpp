@@ -13,11 +13,11 @@ int randomInteger(int min, int max)
     return min + (std::rand() % (max - min + 1));
 }
 
-Pixel HSLtoPixel(int hue, float s, float l)
-{
-    RGBColor col = HSLToRGB(hue, s, l);
-    return {(std::uint8_t)col.r, (std::uint8_t)col.g, (std::uint8_t)col.b};
-}
+// Pixel HSLtoPixel(int hue, float s, float l)
+// {
+//     RGBColor col = HSLToRGB(hue, s, l);
+//     return {(std::uint8_t)col.r, (std::uint8_t)col.g, (std::uint8_t)col.b};
+// }
 
 bool kbhit()
 {
