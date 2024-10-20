@@ -61,6 +61,11 @@ My attempt to simulate a simple raymarching scene in terminal. I followed [An in
 
 ![raymarching](screenshots/raymarching.png)
 
+### app
+
+Just a test code for the renderer which fills the canvas with a bunch of circles each frame :)
+![app](screenshots/app.png)
+
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
