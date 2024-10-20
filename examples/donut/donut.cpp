@@ -110,8 +110,8 @@ int main()
         C += 0.005;
 
         // * DRAWING AXES LINES TO MAKE THINGS EASY TO UNDERSTAND
-        renderer.line(WIDTH_2, 0, WIDTH_2, HEIGHT, {255, 0, 0});
-        renderer.line(0, HEIGHT_2, WIDTH, HEIGHT_2, {0, 255, 0});
+        // renderer.line(WIDTH_2, 0, WIDTH_2, HEIGHT, {255, 0, 0});
+        // renderer.line(0, HEIGHT_2, WIDTH, HEIGHT_2, {0, 255, 0});
 
         //!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         //! YOUR DRAW CODE ENDS HERE
