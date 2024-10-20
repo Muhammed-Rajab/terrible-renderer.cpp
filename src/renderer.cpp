@@ -45,10 +45,11 @@ void Renderer::render()
     std::ostringstream oss;
     for (int y = 0; y < this->height; ++y)
     {
+        int row_offset = y * width;
         for (int x = 0; x < this->width; ++x)
         {
 
-            Pixel &p = this->buffer[y * width + x];
+            Pixel &p = this->buffer[row_offset + x];
 
             // HACK: COLOR CLAMPING
             p.r = std::max(0, std::min(255, (int)p.r));
